@@ -149,10 +149,10 @@ ch:(q,a)=>sayB(q.say)+howB(q.how)+q.opts.map(o=>`<button class="op${String(a[q.i
 num:(q,a)=>sayB(q.say)+howB(q.how)+`<input id="nv" type="number" min="${q.min}" max="${q.max}" value="${a[q.id]??''}" style="width:140px;height:34px;margin-top:6px">`,
 info:(q,a)=>{const s=stg(+a.fac,a.sit);a.stage=s;return `<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0">${NM.map((n,k)=>`<div style="flex:1;min-width:95px;text-align:center;padding:8px 4px;border-radius:var(--radius);font-size:13px;${k+1===s?'background:var(--bg-accent);color:var(--text-accent);border:1px solid var(--border-accent)':'background:var(--bg-neutral);color:var(--text-secondary)'}">${k+1}단계<br>${n}</div>`).join('')}</div>`+howB(`판정 규칙: FAC 0 + 혼자 앉기 불가 → 1단계, FAC 0 + 가능 → 2단계, FAC 1~2 → 3단계, FAC 3~4 → 4단계, FAC 5 → 5단계. 현재 FAC ${a.fac}. ${a.fac>=3?'다음 화면부터 SPPB를 실시합니다.':'FAC 3 미만이므로 SPPB는 건너뜁니다.'}`)},
 bal:(q,a)=>howB('평가자는 항상 이용자 옆에서 넘어지지 않게 보호합니다. 나란히, 반일렬, 일렬 순서로 진행하고 10초를 못 버티면 거기서 멈춥니다.')+sayB('"발을 이렇게 나란히 붙이고 10초 동안 서 계세요. 제가 옆에서 잡아드릴 수 있게 있겠습니다."')+BAL.map((b,k)=>`<button class="op${String(a.bal)===String(k)?' sel':''}" data-bal="${k}">${b[0]}<small>${b[1]}점</small></button>`).join(''),
-gait:(q,a)=>howB('바닥에 테이프로 시작선과 4m 선을 붙입니다. 휴대폰을 가로로 눕혀 옆쪽 2~3m 거리에 세우고, 화면의 빨간 선 두 개가 바닥의 두 테이프와 겹치도록 휴대폰 위치를 맞춥니다. 빨간 선은 손가락으로 끌어 미세 조정할 수 있습니다. 두 선이 모두 화면 안에 들어와야 측정이 됩니다.')+sayB('"평소 걷는 속도로 저 테이프 끝까지 걸어가세요. 서두르지 않으셔도 됩니다."')+
+gait:(q,a)=>howB('바닥에 테이프로 시작선과 4m 선을 붙입니다. 휴대폰을 가로로 눕혀 옆쪽 2~3m 거리에 삼각대나 벽에 기대 고정하고, 화면의 빨간 선 두 개가 바닥의 두 테이프와 겹치도록 휴대폰 위치를 맞춥니다. 빨간 선은 손가락으로 끌어 미세 조정할 수 있습니다. 두 선이 모두 화면 안에 들어와야 측정이 됩니다.')+sayB('"평소 걷는 속도로 저 테이프 끝까지 걸어가세요. 서두르지 않으셔도 됩니다."')+
 `<div id="vbox" style="position:relative;width:100%;aspect-ratio:16/9;background:#111;border-radius:var(--radius);overflow:hidden;margin:8px 0"><video id="cv" muted playsinline style="width:100%;height:100%;object-fit:fill;display:block"></video><canvas id="co" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas><div id="cmsg" style="position:absolute;left:8px;top:8px;right:8px;font-size:14px;font-weight:600;color:#fff;text-shadow:0 0 4px #000">카메라 켜기를 누르세요</div></div>
 <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="md" id="camOn">카메라 켜기</button><button class="md" id="arm">측정 대기</button><button class="md" id="gNa">실시 불가</button></div>
-<div class="kv"><div>측정 거리 (m)</div><input id="gd" type="number" step="0.1" value="${a.gait&&a.gait.d||4}" inputmode="decimal"><div>움직임 민감도</div><input id="sens" type="range" min="8" max="40" step="1" value="18"></div>
+<div class="kv"><div>측정 거리 (m)</div><input id="gd" type="number" step="0.1" value="${a.gait&&a.gait.d||4}" inputmode="decimal"><div>움직임 민감도</div><input id="sens" type="range" min="8" max="40" step="1" value="20"></div>
 <div style="display:flex;gap:10px;align-items:baseline;margin-top:6px"><span class="big" id="gt">${a.gait&&a.gait.t?a.gait.t.toFixed(2):'0.00'}초</span><span id="gOut" style="font-size:14px;font-weight:500"></span></div>
 <div class="how" style="margin-top:8px">카메라를 쓸 수 없을 때: <button class="md" id="mStart">초시계 시작</button> <button class="md" id="mStop">초시계 정지</button></div>`,
 chair:(q,a)=>howB('등받이 있는 의자를 벽에 붙여 고정합니다. 먼저 한 번 일어서 보게 하고, 팔을 쓰지 않고 못 일어나면 실시 불가로 기록합니다. 일어설 때마다 큰 버튼을 누르고, 5번째에 자동으로 멈춥니다.')+sayB('"팔짱을 끼고, 제가 시작하면 최대한 빨리 다섯 번 일어났다 앉아 주세요. 매번 끝까지 펴고 서셔야 합니다."')+
@@ -216,34 +216,43 @@ c.onpointerdown=e=>{d=true;c.setPointerCapture(e.pointerId);const[u,v]=p(e);x.be
 c.onpointermove=e=>{if(!d)return;const[u,v]=p(e);x.lineTo(u,v);x.stroke()};
 c.onpointerup=()=>{d=false;a.clockImg=c.toDataURL('image/png')};
 document.getElementById('clkC').onclick=()=>{delete a.clockImg;base()}}
-function gaitCam(a){a.gait=a.gait||{d:4};const vd=document.getElementById('cv'),co=document.getElementById('co'),msg=document.getElementById('cmsg'),gt=document.getElementById('gt'),go=document.getElementById('gOut'),vb=document.getElementById('vbox'),gd=document.getElementById('gd');
-const W=160,H=90,sc=document.createElement('canvas');sc.width=W;sc.height=H;const sx=sc.getContext('2d',{willReadFrequently:true});
-let L=[0.15,0.85],drag=-1,st='idle',t0=0,prev=null,pcx=null,first=-1,box=null,cxNow=null;
+const GW=160,GH=90;
+function toGray(d){const g=new Float32Array(GW*GH);for(let p=0,k=0;p<GW*GH;p++,k+=4)g[p]=(d[k]*0.299+d[k+1]*0.587+d[k+2]*0.114);return g}
+function meanOf(g){let s=0;for(let p=0;p<g.length;p++)s+=g[p];return s/g.length}
+function detectPerson(cur,bg,th){const dm=meanOf(cur)-meanOf(bg);const col=new Uint16Array(GW);
+for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const p=y*GW+x;if(Math.abs(cur[p]-bg[p]-dm)>th)col[x]++}
+let best=null,s=-1,gap=0;const need=GH*0.25;
+for(let x=0;x<=GW;x++){const on=x<GW&&col[x]>need;if(on){if(s<0)s=x;gap=0}else if(s>=0){gap++;if(gap>2||x===GW){const e=x-gap;const w=e-s+1;if(w>=4&&w<=GW*0.6&&(!best||w>best.w))best={s,e,w};s=-1;gap=0}}}
+if(!best)return null;let fg=0;for(let x=best.s;x<=best.e;x++)fg+=col[x];
+return{cx:(best.s+best.e+1)/2/GW,x0:best.s,x1:best.e+1,fill:fg/(best.w*GH)}}
+function gaitCam(a){a.gait=a.gait||{d:4};const vd=document.getElementById('cv'),co=document.getElementById('co'),msg=document.getElementById('cmsg'),gt=document.getElementById('gt'),go=document.getElementById('gOut'),vb=document.getElementById('vbox'),gd=document.getElementById('gd'),sens=document.getElementById('sens');
+const sc=document.createElement('canvas');sc.width=GW;sc.height=GH;const sx=sc.getContext('2d',{willReadFrequently:true});
+let L=[0.15,0.85],drag=-1,st='idle',t0=0,bg=null,learn=[],noise=8,th=24,pcx=null,first=-1,seen=0,run=null,cxNow=null;
 const dist=()=>Math.max(0.5,+gd.value||4);
-const show=()=>{go.textContent=a.gait.na?'실시 불가: 보행 0점':a.gait.t?`${(a.gait.d/a.gait.t).toFixed(2)} m/s · SPPB 보행 ${gaitP(a.gait)}점`:'';if(!st.startsWith('run'))gt.textContent=(a.gait.t||0).toFixed(2)+'초'};show();
+const show=()=>{go.textContent=a.gait.na?'실시 불가: 보행 0점':a.gait.t?`${(a.gait.d/a.gait.t).toFixed(2)} m/s · SPPB 보행 ${gaitP(a.gait)}점`:'';if(st!=='run')gt.textContent=(a.gait.t||0).toFixed(2)+'초'};show();
 const draw=()=>{const w=co.width=co.clientWidth,h=co.height=co.clientHeight,g=co.getContext('2d');g.clearRect(0,0,w,h);
-L.forEach((l,k)=>{const x=l*w;g.strokeStyle='#ff2d2d';g.lineWidth=4;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillStyle='#ff2d2d';g.font='bold 15px sans-serif';const t=k?dist()+'m 선':'시작선';g.fillText(t,Math.min(Math.max(x-24,4),w-60),h-12);
-g.beginPath();g.arc(x,h/2,10,0,Math.PI*2);g.fill()});
-if(box){g.strokeStyle='#22d3b6';g.lineWidth=2;g.strokeRect(box[0]/W*w,box[1]/H*h,(box[2]-box[0])/W*w,(box[3]-box[1])/H*h)}
-if(cxNow!==null){g.fillStyle='#22d3b6';g.beginPath();g.arc(cxNow*w,h/2,6,0,Math.PI*2);g.fill()}};
-gd.oninput=()=>{draw()};
+if(run){g.fillStyle='rgba(34,211,182,0.25)';g.fillRect(run.x0/GW*w,0,(run.x1-run.x0)/GW*w,h);g.fillStyle='#22d3b6';g.beginPath();g.arc(run.cx*w,h/2,7,0,Math.PI*2);g.fill()}
+L.forEach((l,k)=>{const x=l*w;g.strokeStyle='#ff2d2d';g.lineWidth=4;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillStyle='#ff2d2d';g.font='bold 15px sans-serif';g.fillText(k?dist()+'m 선':'시작선',Math.min(Math.max(x-24,4),w-60),h-12);g.beginPath();g.arc(x,h/2,10,0,Math.PI*2);g.fill()})};
+gd.oninput=draw;
 co.onpointerdown=e=>{const r=co.getBoundingClientRect(),f=(e.clientX-r.left)/r.width;const k=Math.abs(f-L[0])<Math.abs(f-L[1])?0:1;if(Math.abs(f-L[k])<0.08){drag=k;co.setPointerCapture(e.pointerId)}};
 co.onpointermove=e=>{if(drag<0)return;const r=co.getBoundingClientRect();L[drag]=Math.min(0.98,Math.max(0.02,(e.clientX-r.left)/r.width));draw()};
 co.onpointerup=()=>{drag=-1};
-const motion=d=>{const th=+document.getElementById('sens').value;let n=0,sx2=0,x0=W,y0=H,x1=0,y1=0;
-for(let y=0;y<H;y+=1)for(let x=0;x<W;x+=1){const k=(y*W+x)*4,g1=d[k]+d[k+1]+d[k+2],g0=prev[k]+prev[k+1]+prev[k+2];if(Math.abs(g1-g0)/3>th){n++;sx2+=x;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
-return n>W*H*0.004?{cx:sx2/n/W,box:[x0,y0,x1,y1]}:null};
-const loop=()=>{if(!stream)return;sx.drawImage(vd,0,0,W,H);const d=sx.getImageData(0,0,W,H).data;const now=performance.now()/1000;
-if(prev){const m=motion(d);box=m?m.box:null;cxNow=m?m.cx:null;
-if(m&&pcx!==null){const crossed=k=>(pcx-L[k])*(m.cx-L[k])<=0;
+const setTh=()=>{th=Math.max(18,noise*3)*(1.6-(+sens.value-8)/40)};sens.oninput=setTh;
+const loop=()=>{if(!stream)return;sx.drawImage(vd,0,0,GW,GH);const cur=toGray(sx.getImageData(0,0,GW,GH).data);const now=performance.now()/1000;
+if(st==='learn'){learn.push(cur);if(learn.length>=30){bg=new Float32Array(GW*GH);learn.forEach(f=>{for(let p=0;p<bg.length;p++)bg[p]+=f[p]/learn.length});
+let nz=0;learn.forEach(f=>{let s=0;for(let p=0;p<bg.length;p++)s+=Math.abs(f[p]-bg[p]);nz+=s/bg.length});noise=nz/learn.length;setTh();learn=[];
+const chk=detectPerson(cur,bg,th);if(chk){st='idle';bg=null;msg.textContent='화면이 흔들리거나 움직이는 것이 있습니다. 휴대폰을 고정하고 다시 측정 대기를 누르세요'}else{st='armed';pcx=null;first=-1;seen=0;msg.textContent='대기 중: 이용자가 출발하면 자동으로 잽니다'}}}
+else if(bg&&(st==='armed'||st==='run')){const m=detectPerson(cur,bg,th);seen=m?seen+1:0;run=seen>=3?m:null;
+if(run&&pcx!==null){const crossed=k=>(pcx-L[k])*(run.cx-L[k])<=0&&pcx!==run.cx;
 if(st==='armed'){for(const k of[0,1])if(crossed(k)){st='run';first=k;t0=now;msg.textContent='출발 감지: 측정 중';break}}
-else if(st==='run'&&now-t0>0.6&&crossed(1-first)){st='done';a.gait={t:Math.round((now-t0)*100)/100,d:dist()};msg.textContent='도착 감지: 측정 완료';show()}}
-if(m)pcx=m.cx;if(st==='run')gt.textContent=(now-t0).toFixed(2)+'초'}
-prev=new Uint8ClampedArray(d);draw();raf=requestAnimationFrame(loop)};
+else if(st==='run'&&crossed(1-first)){const t=now-t0,v=dist()/t;if(t>1&&v>=0.1&&v<=2.5){st='done';a.gait={t:Math.round(t*100)/100,d:dist()};msg.textContent='도착 감지: 측정 완료';show()}else{st='armed';msg.textContent='비정상 속도라 버렸습니다. 다시 대기 중'}}}
+if(run)pcx=run.cx;if(st==='run'){gt.textContent=(now-t0).toFixed(2)+'초';if(now-t0>60){st='armed';msg.textContent='시간 초과. 다시 대기 중'}}}
+else run=null;
+draw();raf=requestAnimationFrame(loop)};
 document.getElementById('camOn').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});vd.srcObject=stream;await vd.play();
-if(vd.videoWidth)vb.style.aspectRatio=vd.videoWidth+'/'+vd.videoHeight;st='idle';msg.textContent='빨간 선을 바닥 테이프에 맞춘 뒤 측정 대기를 누르세요';setTimeout(draw,200);loop()}
+if(vd.videoWidth)vb.style.aspectRatio=vd.videoWidth+'/'+vd.videoHeight;st='idle';msg.textContent='휴대폰을 고정하고 빨간 선을 바닥 테이프에 맞춘 뒤 측정 대기를 누르세요';setTimeout(draw,200);loop()}
 catch(e){msg.textContent='카메라를 열 수 없습니다. 브라우저 카메라 권한을 확인하세요.'}};
-document.getElementById('arm').onclick=()=>{if(!stream){msg.textContent='먼저 카메라를 켜세요';return}st='armed';pcx=null;first=-1;delete a.gait.na;gt.textContent='0.00초';msg.textContent='대기 중: 이용자가 출발하면 자동으로 잽니다'};
+document.getElementById('arm').onclick=()=>{if(!stream){msg.textContent='먼저 카메라를 켜세요';return}st='learn';learn=[];bg=null;run=null;delete a.gait.na;gt.textContent='0.00초';msg.textContent='빈 화면 학습 중(1초): 화면 밖에 계셔 주세요'};
 let mt=0;document.getElementById('mStart').onclick=()=>{mt=performance.now();clearInterval(tick);tick=setInterval(()=>gt.textContent=((performance.now()-mt)/1000).toFixed(2)+'초',50)};
 document.getElementById('mStop').onclick=()=>{if(!mt)return;clearInterval(tick);a.gait={t:Math.round((performance.now()-mt)/10)/100,d:dist()};mt=0;show()};
 document.getElementById('gNa').onclick=()=>{a.gait={na:1,d:4};show()};draw()}
