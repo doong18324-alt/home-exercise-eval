@@ -41,6 +41,10 @@ input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--surfa
 .nrsg{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;margin:8px 0}
 .nrsg button{height:40px;padding:0;font-size:15px}
 .lsa{border-bottom:0.5px solid var(--border);padding:8px 0}
+#gwrap:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}#gwrap:fullscreen #vbox{height:100vh!important;width:auto!important;max-width:100vw;margin:0;border-radius:0}
+#gwrap:-webkit-full-screen{background:#000;display:flex;align-items:center;justify-content:center}#gwrap:-webkit-full-screen #vbox{height:100vh!important;width:auto!important;max-width:100vw;margin:0;border-radius:0}
+.ppl{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.chips button{font-size:14px;min-height:36px}
 </style>
 <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
 <button class="md" data-m="pre">사전평가</button><button class="md" data-m="ses">회기 모니터링</button><button class="md" data-m="post">사후평가</button>
@@ -51,7 +55,7 @@ input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--surfa
 <script>
 const NM=['누워서 운동','앉아서 운동','잡고 서서 운동','집 안 걷기','집 밖 걷기'];
 const stg=(f,s)=>f==0?(s==='가능'?2:1):f<=2?3:f<=4?4:5;
-const ICF={resp:'',presp:'',fac:'d450 d465',sit:'d4153',stage:'',bal:'d415',gait:'d450',chair:'d410',grip:'b730',sex:'',kmbi:'d420 d510 d530 d540 d550 d4551',lsa:'d4600 d4602 d910',yubi:'s750',struct:'s750 s770 s810',nrs:'b280',ptype:'b280',eq:'복합',mc:'b144',gas:'개인 목표',gasr:'개인 목표',grc:'',dis:'',con:'',eng:'',dose:'',home:'',ev:'',sn:''};
+const ICF={reg:'b530 (체중)',demo:'e310 e320 e340 e165 · 개인요인',who:'',body:'b530',resp:'',presp:'',fac:'d450 d465',sit:'d4153',stage:'',bal:'d415',gait:'d450',chair:'d410',grip:'b730',sex:'',kmbi:'d420 d510 d530 d540 d550 d4551',lsa:'d4600 d4602 d910',yubi:'s750',struct:'s750 s770 s810',nrs:'b280',ptype:'b280',eq:'복합',mc:'b144',gas:'개인 목표',gasr:'개인 목표',grc:'',dis:'',con:'',eng:'',dose:'',home:'',ev:'',sn:''};
 const KM=[['개인위생',5],['목욕',5],['식사',10],['용변 처리',10],['계단 오르기',10],['옷 입기',10],['대변 조절',10],['소변 조절',10],['보행',15],['의자·침대 이동',15]];
 const LV=['과제 수행 불가','최대 도움 필요','중등도 도움 필요','최소 도움·감시','완전 독립'];
 const PTS={5:[0,1,3,4,5],10:[0,2,5,8,10],15:[0,3,8,12,15]};
@@ -60,7 +64,7 @@ const BAL=[['나란히 서기 10초 못함',0],['나란히 서기만 10초 가�
 const gaitP=g=>!g||g.na||!g.t?0:g.t<4.82?4:g.t<=6.2?3:g.t<=8.7?2:1;
 const chairP=c=>!c||c.na||!c.t||c.t>=60?0:c.t<=11.19?4:c.t<=13.69?3:c.t<=16.69?2:1;
 const gMax=g=>!g||g.na?null:Math.max(...[...(g.r||[]),...(g.l||[])].map(Number).filter(x=>x>0));
-const gCut=()=>A.pre.sex==='남성'?28:18;
+const gCut=()=>(A.pre.reg||{}).sex==='남성'?28:18;
 const spTot=a=>(a.bal===undefined||a.bal===''?0:BAL[a.bal][1])+gaitP(a.gait)+chairP(a.chair);
 const FAC=[[0,'0. 걸을 수 없음','두 사람 이상의 도움이 있어야 하거나 전혀 못 걸음'],[1,'1. 한 사람이 계속 붙잡아야 함','체중을 지탱해 주고 균형을 계속 잡아줘야 함'],[2,'2. 한 사람이 가끔 거들어야 함','손을 대고 있거나 가끔 균형을 잡아줘야 함'],[3,'3. 옆에서 지켜보면 걸음','몸에 손대지 않고 말로 안내하거나 지켜보면 걸을 수 있음'],[4,'4. 평지는 혼자 걸음','계단, 경사, 문턱은 도움이나 감시 필요'],[5,'5. 어디서나 혼자 걸음','계단, 경사 포함 혼자 가능']];
 const LSA=[['집 안의 다른 방','침실 말고 거실, 부엌, 화장실 같은 집 안 다른 곳에 가셨나요?'],['집 바로 바깥','현관 앞, 마당, 베란다, 아파트 복도나 주차장처럼 집 바로 바깥에 나가셨나요?'],['동네','집 근처 동네, 걸어서 10분 이내의 이웃집이나 단지 안 상가에 가셨나요?'],['동네 밖 시내','동네를 벗어나 시장, 병원, 복지관 같은 시내에 가셨나요?'],['다른 도시','사시는 도시 밖으로 나가셨나요?']];
@@ -80,8 +84,9 @@ const gasScore=(b,x)=>x<b?-2:Math.min(2,x-b-1);
 const SC5=(lo,hi,mid)=>[1,2,3,4,5].map(v=>[v,v+'점',v==1?lo:v==5?hi:v==3?mid||'':'']);
 const ch=(id,sec,title,say,how,opts,cond)=>({id,sec,title,say,how,t:'ch',opts,cond});
 const Q={pre:[
+{id:'reg',sec:'대상자 등록',t:'reg',title:'대상자 등록 (첫 방문 1회)'},
+{id:'demo',sec:'인구사회학적 특성',t:'demo',title:'생활 환경과 가족 (첫 방문 1회)'},
 ch('resp','기본','응답 방식','어르신, 지금부터 몸 상태를 몇 가지 여쭤보고 간단히 움직여 보겠습니다. 힘드시면 언제든 말씀해 주세요.','본인이 질문을 이해하고 답할 수 있는지 먼저 확인합니다. 어려우면 보호자에게 대신 묻고 대리응답으로 기록합니다.',[['직접응답','직접응답'],['대리응답','대리응답 (보호자)'],['혼합','혼합 (일부 문항 보호자)']]),
-ch('sex','기본','성별','','악력 판정 기준(남 28kg, 여 18kg 미만)에 쓰입니다.',[['여성','여성'],['남성','남성']]),
 ch('fac','이동능력','FAC 기능적 보행 분류','평소처럼 집 안에서 몇 걸음 걸어 보시겠어요? 제가 옆에 있겠습니다.','직접 걷는 모습을 보고 판정합니다. 보조기는 평소 쓰는 대로 사용합니다. 위험하면 걷기를 시키지 않고 0으로 기록합니다.',FAC),
 ch('sit','이동능력','혼자 앉기 (FAC 0일 때만)','등을 기대지 않고 침대 끝에 혼자 앉아 계실 수 있으세요? 한번 앉아 보시겠어요?','침대 가장자리에서 등받이 없이 30초 앉은 자세를 유지하는지 관찰합니다.',[['가능','혼자 30초 앉아 있을 수 있음'],['부분','잡거나 기대야 앉아 있을 수 있음'],['불가','앉아 있기 어려움']],a=>a.fac==0),
 {id:'stage',sec:'자동 판정',t:'info',title:'기능 단계 자동 판정'},
@@ -100,6 +105,7 @@ ch('ptype','통증','통증 유형 (NRS 1점 이상일 때만)','그 통증은 �
 {id:'gas',sec:'목표',t:'gas',title:'개인 목표 설정 (GAS 단계표)'},
 {id:'end',t:'end',sec:'완료',title:'사전평가 요약'}],
 ses:[
+{id:'who',sec:'대상자',t:'who',title:'오늘 방문할 대상자'},
 {id:'sn',sec:'기록',t:'num',title:'회기 번호',min:1,max:30,how:'이번 방문이 몇 번째 회기인지 입력합니다.'},
 ch('dis','운동 전 (이용자 응답)','불편감','오늘 몸이 불편한 곳이 있으세요? 하나도 없으면 1점, 아주 많이 불편하면 5점이에요.','통증뿐 아니라 뻐근함, 어지러움 등 불편감 전반을 묻습니다.',SC5('전혀 없음','매우 심함','보통')),
 ch('con','운동 전 (이용자 응답)','오늘 컨디션','오늘 몸 상태는 어떠세요? 아주 나쁘면 1점, 아주 좋으면 5점이에요.','2점 이하이면 운동 강도를 낮추고 특이사항에 사유를 적습니다.',SC5('매우 나쁨','매우 좋음','보통')),
@@ -109,6 +115,8 @@ ch('home','운동 후 (이용자 응답)','자가운동','지난번 방문 이�
 {id:'ev',sec:'특이사항',t:'multi',key:'ev',title:'특이사항 (해당 모두 선택)',opts:['없음','낙상','병원 방문·입원','약 변경','운동 중 이상반응','보호자 교육 실시','계획 조정'],how:'낙상은 즉시 재상담 대상으로 표시됩니다.'},
 {id:'end',t:'sesend',sec:'완료',title:'회기 기록 완료'}],
 post:[
+{id:'who',sec:'대상자',t:'who',title:'사후평가 대상자'},
+{id:'body',sec:'신체계측',t:'body',title:'몸무게 다시 재기'},
 ch('presp','기본','응답 방식','어르신, 그동안 운동하신 결과를 확인하려고 처음에 했던 것들을 다시 해 보겠습니다.','사전과 응답 방식이 달라지면 결과지에 표시됩니다.',[['직접응답','직접응답'],['대리응답','대리응답 (보호자)'],['혼합','혼합']]),
 ch('fac','이동능력','FAC 기능적 보행 분류','처음처럼 집 안에서 몇 걸음 걸어 보시겠어요?','사전과 같은 장소, 같은 보조기로 판정합니다.',FAC),
 ch('sit','이동능력','혼자 앉기 (FAC 0일 때만)','침대 끝에 등을 기대지 않고 혼자 앉아 보시겠어요?','30초 유지 여부를 관찰합니다.',[['가능','혼자 30초 가능'],['부분','잡거나 기대야 가능'],['불가','어려움']],a=>a.fac==0),
@@ -125,12 +133,29 @@ ch('sit','이동능력','혼자 앉기 (FAC 0일 때만)','침대 끝에 등을 
 {id:'gasr',sec:'목표',t:'gasr',title:'목표 달성 판정 (GAS 단계표)'},
 ch('grc','전반적 변화','전반적 변화 인식','서비스 받기 전과 비교해서, 혼자 일상생활 하시는 게 어떻게 달라지셨어요?','변화 판정 기준(MCID) 산출용 기준 문항입니다. 평가자가 해석을 덧붙이지 않습니다.',[[1,'아주 많이 좋아짐'],[2,'많이 좋아짐'],[3,'조금 좋아짐'],[4,'그대로'],[5,'조금 나빠짐'],[6,'많이 나빠짐'],[7,'아주 많이 나빠짐']]),
 {id:'end',t:'result',sec:'결과',title:'자동 결과지'}]};
-const EX={pre:{resp:'직접응답',sex:'여성',grip:{r:[15.2,14.8],l:[13.9,14.1]},fac:3,bal:1,gait:{t:8.3,d:4},chair:{t:18,n:5,done:1},km0:4,km1:3,km2:5,km3:4,km4:2,km5:4,km6:5,km7:4,km8:3,km9:4,
+const EX={pre:{reg:{nm:'김순자',birth:'1948-03-12',sex:'여성',ht:152,wt:48.5,wsrc:'직접 측정',tel:'010-0000-0000',id:'GS01-2611-003'},demo:{mar:'사별',live:'독거',kids:3,contact:'월1~3회',carer:'자녀',edu:'초졸',med:'건강보험',ltc:'등급외',inc:2,src:['국민연금','기초연금']},resp:'직접응답',grip:{r:[15.2,14.8],l:[13.9,14.1]},fac:3,bal:1,gait:{t:8.3,d:4},chair:{t:18,n:5,done:1},km0:4,km1:3,km2:5,km3:4,km4:2,km5:4,km6:5,km7:4,km8:3,km9:4,
 lsa:[{go:1,f:4,aid:1,help:0},{go:1,f:2,aid:1,help:0},{go:1,f:1,aid:1,help:1},{go:1,f:1,aid:1,help:1},{go:0}],yubi:'딱 맞음',struct:['관절 변형·구축'],nrs:5,ptype:'만성',eq0:3,eq1:2,eq2:3,eq3:3,eq4:2,vas:50,
 words:['사과','기차','바다'],rec:[1,0,0],clock:'비정상',goals:[{lib:'out',base:2},{lib:'toilet',base:3}]},
-ses:{sn:6,dis:2,con:4,eng:4,dose:4,home:3,ev:['보호자 교육 실시','계획 조정']},
-post:{presp:'직접응답',grip:{r:[17.0,16.4],l:[15.0,15.5]},fac:4,bal:2,gait:{t:6.5,d:4},chair:{t:15,n:5,done:1},km0:4,km1:3,km2:5,km3:4,km4:3,km5:4,km6:5,km7:4,km8:4,km9:4,
+ses:{who:'GS01-2611-003',sn:6,dis:2,con:4,eng:4,dose:4,home:3,ev:['보호자 교육 실시','계획 조정']},
+post:{who:'GS01-2611-003',wt:49.6,wsrc:'직접 측정',presp:'직접응답',grip:{r:[17.0,16.4],l:[15.0,15.5]},fac:4,bal:2,gait:{t:6.5,d:4},chair:{t:15,n:5,done:1},km0:4,km1:3,km2:5,km3:4,km4:3,km5:4,km6:5,km7:4,km8:4,km9:4,
 lsa:[{go:1,f:4,aid:1,help:0},{go:1,f:3,aid:1,help:0},{go:1,f:2,aid:1,help:0},{go:1,f:1,aid:1,help:1},{go:0}],yubi:'딱 맞음',nrs:3,eq0:2,eq1:2,eq2:2,eq3:2,eq4:2,vas:65,achv:[3,5],grc:3}};
+const ORG='GS01';
+const PEOPLE=[{id:'GS01-2611-003',nm:'김순자',birth:'1948-03-12',sex:'여성',stage:3,ses:6},{id:'GS01-2611-007',nm:'박영식',birth:'1944-09-02',sex:'남성',stage:2,ses:12},{id:'GS01-2611-009',nm:'이말순',birth:'1952-01-25',sex:'여성',stage:4,ses:12},{id:'GS01-2611-012',nm:'최정남',birth:'1946-06-30',sex:'남성',stage:3,ses:8},{id:'GS01-2611-015',nm:'정옥희',birth:'1939-11-08',sex:'여성',stage:1,ses:12},{id:'GS01-2611-018',nm:'한복례',birth:'1950-04-17',sex:'여성',stage:4,ses:3}];
+const ageOf=b=>{if(!b)return null;const d=new Date(b),n=new Date();let y=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))y--;return y};
+const bmiOf=(h,w)=>h>0&&w>0?Math.round(w/((h/100)**2)*10)/10:null;
+const bmiC=b=>b==null?'':b<18.5?'저체중':b<23?'정상':b<25?'비만 전 단계':b<30?'1단계 비만':'2단계 이상 비만';
+const newId=()=>{const n=new Date();return `${ORG}-${String(n.getFullYear()).slice(2)}${String(n.getMonth()+1).padStart(2,'0')}-${String(PEOPLE.length*3+1).padStart(3,'0')}`};
+const WSRC=[['직접 측정','오늘 체중계로 직접 측정'],['최근 기록','최근 3개월 내 검진·병원 기록'],['본인 보고','본인·보호자 보고']];
+const DEMO=[['mar','결혼 상태',[['유배우','배우자 있음'],['사별','사별'],['이혼·별거','이혼·별거'],['미혼','미혼']]],
+['live','함께 사는 사람',[['독거','혼자 삶'],['배우자','배우자와 둘이'],['자녀·가족','자녀 등 가족과'],['배우자+자녀','배우자, 자녀와 함께'],['기타','기타 (친척, 지인 등)']]],
+['kids','자녀 수',[[0,'없음'],[1,'1명'],[2,'2명'],[3,'3명'],[4,'4명 이상']]],
+['contact','따로 사는 가족과 연락·만남',[['주1회이상','주 1회 이상'],['월1~3회','월 1~3회'],['월1회미만','월 1회 미만'],['거의없음','거의 없음 또는 가족 없음']]],
+['carer','주로 돌봐 주는 사람',[['없음','없음'],['배우자','배우자'],['자녀','자녀'],['자녀의배우자','며느리·사위'],['형제·친척','형제·친척'],['이웃·지인','이웃·지인'],['돌봄인력','요양보호사 등 돌봄 인력']]],
+['edu','교육 수준',[['무학','학교 안 다님 (글 모름)'],['무학·문해','학교 안 다님 (글 읽음)'],['초졸','초등학교'],['중졸','중학교'],['고졸','고등학교'],['대졸이상','대학 이상']]],
+['med','의료보장',[['건강보험','건강보험'],['의료급여1종','의료급여 1종'],['의료급여2종','의료급여 2종']]],
+['ltc','장기요양등급',[['미신청','없음 (신청 안 함)'],['등급외','등급 외 판정'],['인지지원','인지지원등급'],['3~5등급','3~5등급'],['1~2등급','1~2등급']]],
+['inc','월 소득 (본인·배우자, 연금 포함)',[[1,'50만 원 미만'],[2,'50만~100만 원'],[3,'100만~200만 원'],[4,'200만~300만 원'],[5,'300만 원 이상'],[9,'모름·응답 안 함']]]];
+const INCS=['국민연금','기초연금','공무원·군인·사학연금','기초생활수급 (생계급여)','근로 소득','자녀 등 가족 지원','재산·임대 소득','없음'];
 const clone=o=>JSON.parse(JSON.stringify(o));
 let A={pre:clone(EX.pre),ses:clone(EX.ses),post:clone(EX.post)},mode='pre',i=0,stream=null,raf=0,tick=0;
 const list=()=>Q[mode].filter(q=>!q.cond||q.cond(A[mode]));
@@ -138,22 +163,41 @@ const opt=(arr,v)=>arr.map(o=>`<option value="${o[0]}"${String(o[0])===String(v)
 const sayB=s=>s?`<div class="say">평가자 읽기: ${s}</div>`:'';
 const howB=s=>s?`<div class="how">${s}</div>`:'';
 const mcS=a=>(a.rec||[]).filter(Boolean).length+(a.clock==='정상'?2:0);
-function stopMedia(){const v=document.getElementById('cv');if(v){try{v.pause()}catch(e){}}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}cancelAnimationFrame(raf);clearInterval(tick)}
+function stopMedia(){const v=document.getElementById('cv');if(v){try{v.pause()}catch(e){}}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}cancelAnimationFrame(raf);clearInterval(tick);window.onresize=null}
 function render(){stopMedia();const L=list();if(i>=L.length)i=L.length-1;const q=L[i],a=A[mode];
 document.getElementById('bar').style.width=((i+1)/L.length*100)+'%';document.getElementById('err').textContent='';
 let h=`<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap"><span><span class="tag">${q.sec}</span>${ICF[q.id]?`<span class="tag">ICF ${ICF[q.id]}</span>`:''}</span><span style="font-size:12px;color:var(--text-muted)">${i+1} / ${L.length}</span></div><div style="font-size:17px;font-weight:500;margin:8px 0 2px">${q.title}</div>`;
 h+=(V[q.t]||(()=>''))(q,a);document.getElementById('q').innerHTML=h;(B[q.t]||(()=>{}))(q,a);
 document.getElementById('pv').style.visibility=i?'visible':'hidden';document.getElementById('nx').style.visibility=i<L.length-1?'visible':'hidden'}
 const V={
+reg:(q,a)=>{a.reg=a.reg||{};const r=a.reg;if(!r.id)r.id=newId();const ag=ageOf(r.birth),b=bmiOf(+r.ht,+r.wt);
+return sayB('"어르신, 처음 뵙겠습니다. 성함과 생년월일부터 여쭤볼게요."')+howB('이름, 생년월일, 연락처는 「식별정보」 저장소에만 들어가고, 평가 기록에는 자동 발급된 등록번호만 붙습니다. 키는 서기 어려우면 본인 보고로 받습니다. 몸무게는 체중계가 없으면 최근 기록을 쓰고 출처를 고릅니다.')+
+`<div class="kv"><div>이름</div><input data-rg="nm" value="${r.nm||''}" autocomplete="off"><div>생년월일</div><input data-rg="birth" type="date" value="${r.birth||''}"><div>연락처 (선택)</div><input data-rg="tel" type="tel" inputmode="tel" value="${r.tel||''}"></div>
+<div class="kv"><div>성별</div><div style="display:flex;gap:6px">${['여성','남성'].map(x=>`<button class="md${r.sex===x?' on':''}" data-sx="${x}">${x}</button>`).join('')}</div>
+<div>키 (cm)</div><input data-rg="ht" type="number" step="0.1" inputmode="decimal" value="${r.ht||''}"><div>몸무게 (kg)</div><input data-rg="wt" type="number" step="0.1" inputmode="decimal" value="${r.wt||''}"><div>몸무게 출처</div><select data-rg="wsrc"><option value="">선택</option>${opt(WSRC,r.wsrc)}</select></div>
+<div class="say" id="regOut">등록번호 <b>${r.id}</b> 자동 발급 · 나이 ${ag??'-'}세 · BMI ${b??'-'} ${bmiC(b)}</div><div class="how">BMI 판정은 대한비만학회 기준(23 이상 비만 전 단계, 25 이상 비만)입니다. 악력 기준(남 28kg, 여 18kg)에 성별이 쓰입니다.</div>`},
+demo:(q,a)=>{a.demo=a.demo||{};const d=a.demo;d.src=d.src||[];return sayB('"생활하시는 형편을 몇 가지 여쭤볼게요. 답하기 곤란하신 건 말씀 안 하셔도 됩니다."')+howB('첫 방문에 한 번만 묻습니다. 소득은 정확한 금액 대신 구간으로 묻고, 연금과 수당을 포함합니다. 결과 해석 때 이용자 특성 보정에 쓰입니다.')+
+DEMO.map(([k,t,o])=>`<div class="kv"><div>${t}</div><select data-dm="${k}"><option value="">선택</option>${opt(o,d[k])}</select></div>`).join('')+
+`<div style="font-size:13px;margin-top:8px">소득원 (해당 모두)</div><div class="chips">${INCS.map(x=>`<button class="md${d.src.includes(x)?' on':''}" data-is="${x}">${x}</button>`).join('')}</div>`+
+(d.live==='독거'?`<div class="say" style="background:var(--bg-warning);color:var(--text-warning)">독거 어르신: 회기 기록에서 낙상·연락 두절 알림을 우선 표시합니다.</div>`:'')},
+who:(q,a)=>howB('담당 대상자만 보입니다. 이름으로 고르면 기록에는 등록번호로 저장됩니다.')+PEOPLE.map(p=>`<button class="op${a.who===p.id?' sel':''}" data-who="${p.id}"><span class="ppl"><span><b>${p.nm}</b> · ${ageOf(p.birth)}세 ${p.sex}</span><span style="font-size:12px;color:var(--text-muted)">${p.stage}단계 · ${p.ses}회기</span></span><small>${p.id}</small></button>`).join('')+`<button class="op" style="text-align:center;border-style:dashed">+ 새 대상자 등록 (사전평가로 이동)</button>`,
+body:(q,a)=>{const r=A.pre.reg||{},b0=bmiOf(+r.ht,+r.wt),b1=bmiOf(+r.ht,+a.wt);return howB('사전과 같은 방법(같은 체중계, 같은 출처)으로 잽니다. 키는 사전 값을 그대로 씁니다.')+
+`<div class="kv"><div>몸무게 (kg)</div><input id="pwt" type="number" step="0.1" inputmode="decimal" value="${a.wt||''}"><div>출처</div><select id="pws"><option value="">선택</option>${opt(WSRC,a.wsrc)}</select></div><div class="say" id="bOut">사전 ${r.wt||'-'} kg (BMI ${b0??'-'}) → 지금 ${a.wt||'-'} kg (BMI ${b1??'-'} ${bmiC(b1)})</div>`},
 ch:(q,a)=>sayB(q.say)+howB(q.how)+q.opts.map(o=>`<button class="op${String(a[q.id])===String(o[0])?' sel':''}" data-v="${o[0]}">${o[1]}${o[2]?`<small>${o[2]}</small>`:''}</button>`).join(''),
 num:(q,a)=>sayB(q.say)+howB(q.how)+`<input id="nv" type="number" min="${q.min}" max="${q.max}" value="${a[q.id]??''}" style="width:140px;height:34px;margin-top:6px">`,
 info:(q,a)=>{const s=stg(+a.fac,a.sit);a.stage=s;return `<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0">${NM.map((n,k)=>`<div style="flex:1;min-width:95px;text-align:center;padding:8px 4px;border-radius:var(--radius);font-size:13px;${k+1===s?'background:var(--bg-accent);color:var(--text-accent);border:1px solid var(--border-accent)':'background:var(--bg-neutral);color:var(--text-secondary)'}">${k+1}단계<br>${n}</div>`).join('')}</div>`+howB(`판정 규칙: FAC 0 + 혼자 앉기 불가 → 1단계, FAC 0 + 가능 → 2단계, FAC 1~2 → 3단계, FAC 3~4 → 4단계, FAC 5 → 5단계. 현재 FAC ${a.fac}. ${a.fac>=3?'다음 화면부터 SPPB를 실시합니다.':'FAC 3 미만이므로 SPPB는 건너뜁니다.'}`)},
 bal:(q,a)=>howB('평가자는 항상 이용자 옆에서 넘어지지 않게 보호합니다. 나란히, 반일렬, 일렬 순서로 진행하고 10초를 못 버티면 거기서 멈춥니다.')+sayB('"발을 이렇게 나란히 붙이고 10초 동안 서 계세요. 제가 옆에서 잡아드릴 수 있게 있겠습니다."')+BAL.map((b,k)=>`<button class="op${String(a.bal)===String(k)?' sel':''}" data-bal="${k}">${b[0]}<small>${b[1]}점</small></button>`).join(''),
-gait:(q,a)=>howB('바닥에 테이프로 시작선과 4m 선을 붙입니다. 휴대폰을 가로로 눕혀 옆쪽 2~3m 거리에 삼각대나 벽에 기대 고정하고, 이용자는 시작선 바깥 1m 지점에 서서 초록불을 확인한 뒤 출발합니다. 화면의 빨간 선 두 개가 바닥의 두 테이프와 겹치도록 휴대폰 위치를 맞춥니다. 빨간 선은 손가락으로 끌어 미세 조정할 수 있습니다. 두 선이 모두 화면 안에 들어와야 측정이 됩니다.')+sayB('"평소 걷는 속도로 저 테이프 끝까지 걸어가세요. 서두르지 않으셔도 됩니다."')+
-`<div id="vbox" style="position:relative;width:100%;aspect-ratio:16/9;background:#111;border-radius:var(--radius);overflow:hidden;margin:8px 0"><video id="cv" muted playsinline style="width:100%;height:100%;object-fit:fill;display:block"></video><canvas id="co" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas><div id="lamp" style="position:absolute;right:8px;top:8px;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;background:rgba(0,0,0,.6);color:#fff;font-size:14px;font-weight:700"><span id="lampDot" style="width:16px;height:16px;border-radius:50%;background:#777;display:inline-block"></span><span id="lampTxt">대기 전</span></div><div id="cmsg" style="position:absolute;left:8px;top:44px;right:8px;font-size:14px;font-weight:600;color:#fff;text-shadow:0 0 4px #000">카메라 켜기를 누르세요</div></div>
-<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="md" id="camOn">카메라 켜기</button><button class="md" id="arm">측정 대기</button><button class="md" id="gNa">실시 불가</button></div>
+gait:(q,a)=>howB('<b>휴대폰은 반드시 가로로 눕혀서</b> 씁니다. 세로이면 측정이 막힙니다. 바닥에 시작선과 4m 선 테이프를 붙이고, 휴대폰은 걷는 길 옆 2~3m 거리, 허리 높이에 고정합니다(삼각대나 선반). 이용자는 시작선 1m 뒤에서 출발해 4m 선 1m 앞까지 걸어가며, 몸 중심이 두 선을 지나는 시간을 잽니다. 화면의 빨간 선 두 개를 손가락으로 끌어 바닥 테이프에 맞춥니다. SPPB 방식대로 2회 재서 빠른 기록을 씁니다.')+sayB('"평소 걷는 속도로 저 테이프 끝까지 걸어가세요. 서두르지 않으셔도 됩니다."')+
+`<div id="gwrap"><div id="vbox" style="position:relative;width:100%;aspect-ratio:16/9;background:#111;border-radius:var(--radius);overflow:hidden;margin:8px auto"><video id="cv" muted playsinline style="width:100%;height:100%;object-fit:fill;display:block"></video><canvas id="co" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
+<div id="lamp" style="position:absolute;right:8px;top:8px;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;background:rgba(0,0,0,.6);color:#fff;font-size:14px;font-weight:700"><span id="lampDot" style="width:16px;height:16px;border-radius:50%;background:#777;display:inline-block"></span><span id="lampTxt">대기 전</span></div>
+<div id="cmsg" style="position:absolute;left:8px;top:44px;right:8px;font-size:14px;font-weight:600;color:#fff;text-shadow:0 0 4px #000">카메라 켜기를 누르세요</div>
+<div id="hud" style="position:absolute;left:8px;bottom:8px;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">0.00초</div>
+<button id="arm" style="position:absolute;right:8px;bottom:8px;background:#0f8a7a;color:#fff;border:0;font-weight:700">측정 대기</button>
+<div id="rot" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.85);color:#fff;font-size:18px;font-weight:700;text-align:center;padding:12px"><svg width="70" height="70" viewBox="0 0 70 70"><rect x="24" y="8" width="22" height="38" rx="4" fill="none" stroke="#fff" stroke-width="3"/><rect x="14" y="40" width="42" height="22" rx="4" fill="none" stroke="#22c55e" stroke-width="3"/><path d="M52 18 a16 16 0 0 1 4 18" fill="none" stroke="#22c55e" stroke-width="3"/><path d="M52 36 l4 0 l0 -5" fill="none" stroke="#22c55e" stroke-width="3"/></svg>휴대폰을 가로로 돌려 주세요<span style="font-size:13px;font-weight:400">아이폰은 제어센터에서 세로 화면 고정을 끈 뒤 돌립니다</span></div>
+</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="md" id="camOn">카메라 켜기</button><button class="md" id="fsOn">가로 전체화면</button><button class="md" id="gClr">기록 지우기</button><button class="md" id="gNa">실시 불가</button></div>
 <div class="kv"><div>측정 거리 (m)</div><input id="gd" type="number" step="0.1" value="${a.gait&&a.gait.d||4}" inputmode="decimal"><div>움직임 민감도</div><input id="sens" type="range" min="8" max="40" step="1" value="20"></div>
-<div style="display:flex;gap:10px;align-items:baseline;margin-top:6px"><span class="big" id="gt">${a.gait&&a.gait.t?a.gait.t.toFixed(2):'0.00'}초</span><span id="gOut" style="font-size:14px;font-weight:500"></span></div>
+<div id="gTr" style="font-size:14px;margin-top:6px"></div><div id="gOut" style="font-size:15px;font-weight:500;margin-top:4px"></div><span id="gt" class="hidden"></span>
 <div class="how" style="margin-top:8px">카메라를 쓸 수 없을 때: <button class="md" id="mStart">초시계 시작</button> <button class="md" id="mStop">초시계 정지</button></div>`,
 chair:(q,a)=>howB('등받이 있는 의자를 벽에 붙여 고정합니다. 먼저 한 번 일어서 보게 하고, 팔을 쓰지 않고 못 일어나면 실시 불가로 기록합니다. 일어설 때마다 큰 버튼을 누르고, 5번째에 자동으로 멈춥니다.')+sayB('"팔짱을 끼고, 제가 시작하면 최대한 빨리 다섯 번 일어났다 앉아 주세요. 매번 끝까지 펴고 서셔야 합니다."')+
 `<div style="display:flex;gap:16px;align-items:center;margin:10px 0;flex-wrap:wrap"><span class="big" id="ct">${a.chair&&a.chair.t?a.chair.t.toFixed(2):'0.00'}초</span><span class="big" id="cn">${a.chair?a.chair.n||0:0} / 5회</span></div>
@@ -182,12 +226,18 @@ gas:(q,a)=>{a.goals=a.goals||[{},{}];while(a.goals.length<2)a.goals.push({});ret
 [0,1].map(g=>{const G=a.goals[g]||{};const L=GLIB[G.lib];return `<div class="lsa"><div style="font-size:14px;font-weight:500">목표 ${g+1}${g?' (선택)':' (필수)'}</div><div class="kv"><div>목표 영역</div><select data-g="${g}" data-gf="lib"><option value="">선택</option>${opt(Object.entries(GLIB).map(([k,v])=>[k,v[0]]),G.lib)}</select></div>${L?`<div class="kv"><div>지금 수준</div><select data-g="${g}" data-gf="base"><option value="">선택</option>${opt(L[1].slice(0,4).map((t,m)=>[m+1,(m+1)+'. '+t]),G.base)}</select></div>${G.base?`<div style="font-size:13px;margin-top:4px">${L[1].map((t,m)=>{const sc=gasScore(+G.base,m+1);return `<div style="padding:3px 0;${m+1===+G.base+1?'color:var(--text-accent);font-weight:500':''}">${sc>0?'+':''}${sc}점 · ${t}${m+1===+G.base?' (현재)':m+1===+G.base+1?' (기대 목표)':''}</div>`}).join('')}</div>`:''}`:''}</div>`}).join('')},
 gasr:(q,a)=>{const gs=(A.pre.goals||[]).filter(g=>g.lib&&g.base);a.achv=a.achv||[];return sayB('"처음에 세웠던 목표, 지금은 어디까지 되셨는지 같이 볼까요?"')+howB('사전에 고른 단계표에서 지금 수준을 다시 고르면 GAS 점수가 자동으로 계산됩니다.')+
 (gs.length?gs.map((G,g)=>{const L=GLIB[G.lib];const x=a.achv[g];return `<div class="lsa"><div style="font-size:14px;font-weight:500">목표 ${g+1}: ${L[0]} <span style="font-weight:400;color:var(--text-secondary)">(시작 ${G.base}단계, 기대 ${+G.base+1}단계)</span></div>${L[1].map((t,m)=>`<button class="op${x===m+1?' sel':''}" data-ga="${g}" data-gv="${m+1}">${m+1}. ${t}<small>${(s=>(s>0?'+':'')+s)(gasScore(+G.base,m+1))}점</small></button>`).join('')}</div>`}).join(''):'<div class="how">사전평가 목표가 없습니다. 사전평가를 먼저 입력하세요.</div>')},
-end:(q,a)=>`<div class="how">저장 시 스프레드시트 「사전평가」 시트에 1행이 추가되고, 문항별 ICF 코드가 함께 기록됩니다.</div>`+[
-['기능 단계',`${a.stage||stg(+a.fac,a.sit)}단계 ${NM[(a.stage||stg(+a.fac,a.sit))-1]}`,''],['SPPB',a.fac>=3?spTot(a)+'점':'실시 불가 (FAC 3 미만)',a.fac>=3&&a.gait&&a.gait.t?'보행속도 '+(a.gait.d/a.gait.t).toFixed(2)+' m/s':''],['악력',a.grip&&!a.grip.na?gMax(a.grip)+' kg':'측정 불가',a.grip&&gMax(a.grip)<gCut()?'근력 저하':''],['K-MBI',kmTot(a)+'점',''],['K-LSA',lsaTot(a)+' / 120',''],['손가락 고리',a.yubi||'-',a.yubi==='작음'?'근감소 의심':''],['신체구조',(a.struct||[]).join(', ')||'-',''],['통증',a.nrs+'점 '+(a.ptype||''),+a.nrs>=1?'사후 측정 대상':'사후 측정 제외'],['Mini-Cog',mcS(a)+'점',mcS(a)<=2?'인지저하 의심, 보호자 동반 표시':''],['목표',(a.goals||[]).filter(g=>g.lib).map(g=>GLIB[g.lib][0]).join(', '),'']].map(r=>`<div class="rr"><div>${r[0]}</div><div>${r[1]}</div><div>${r[2]}</div></div>`).join(''),
+end:(q,a)=>{const r=a.reg||{},d=a.demo||{},b=bmiOf(+r.ht,+r.wt);return `<div class="how">저장 시 이름·생년월일·연락처는 「식별정보」에, 나머지는 등록번호와 함께 「사전평가」 시트에 1행으로 기록되고 문항별 ICF 코드가 함께 붙습니다.</div>`+[['대상자',`${r.nm||'-'} (${r.id||'-'})`,`${ageOf(r.birth)??'-'}세 ${r.sex||''}`],['신체계측',`${r.ht||'-'} cm · ${r.wt||'-'} kg`,`BMI ${b??'-'} ${bmiC(b)}`],['생활 환경',`${(DEMO[1][2].find(o=>o[0]===d.live)||[,'-'])[1]} · ${(DEMO[0][2].find(o=>o[0]===d.mar)||[,'-'])[1]}`,d.live==='독거'?'독거 알림 우선':''],['소득',(DEMO[8][2].find(o=>o[0]===d.inc)||[,'-'])[1],(d.src||[]).join(', ')],
+['기능 단계',`${a.stage||stg(+a.fac,a.sit)}단계 ${NM[(a.stage||stg(+a.fac,a.sit))-1]}`,''],['SPPB',a.fac>=3?spTot(a)+'점':'실시 불가 (FAC 3 미만)',a.fac>=3&&a.gait&&a.gait.t?'보행속도 '+(a.gait.d/a.gait.t).toFixed(2)+' m/s':''],['악력',a.grip&&!a.grip.na?gMax(a.grip)+' kg':'측정 불가',a.grip&&gMax(a.grip)<gCut()?'근력 저하':''],['K-MBI',kmTot(a)+'점',''],['K-LSA',lsaTot(a)+' / 120',''],['손가락 고리',a.yubi||'-',a.yubi==='작음'?'근감소 의심':''],['신체구조',(a.struct||[]).join(', ')||'-',''],['통증',a.nrs+'점 '+(a.ptype||''),+a.nrs>=1?'사후 측정 대상':'사후 측정 제외'],['Mini-Cog',mcS(a)+'점',mcS(a)<=2?'인지저하 의심, 보호자 동반 표시':''],['목표',(a.goals||[]).filter(g=>g.lib).map(g=>GLIB[g.lib][0]).join(', '),'']].map(r=>`<div class="rr"><div>${r[0]}</div><div>${r[1]}</div><div>${r[2]}</div></div>`).join('')},
 sesend:(q,a)=>{const al=[];if(+a.con<=2)al.push('컨디션 2점 이하: 강도 하향 사유 기록');if(+a.dis>=4)al.push('불편감 4점 이상: 누적 2회 시 담당자 확인');if((a.ev||[]).includes('낙상'))al.push('낙상: 재상담 대상');if(mcS(A.pre)<=2&&+a.home<=2)al.push('인지저하 의심 + 자가운동 저조: 3회 연속 시 보호자 참여 권장');
-return `<div class="how">저장 시 「회기기록」 시트에 1행 추가. 알림 규칙은 누적 기록으로 판정합니다.</div>`+(al.length?al.map(x=>`<div class="say" style="background:var(--bg-warning);color:var(--text-warning)">${x}</div>`).join(''):'<div class="how">이번 회기 알림 없음</div>')},
+if((A.pre.demo||{}).live==='독거'&&((a.ev||[]).includes('낙상')||+a.con<=2))al.unshift('독거 어르신: 보호자·기관에 당일 연락 권장');const P=PEOPLE.find(p=>p.id===a.who)||{};return `<div class="how">${P.nm||''} (${a.who||'-'}) · 저장 시 「회기기록」 시트에 등록번호로 1행 추가. 알림 규칙은 누적 기록으로 판정합니다.</div>`+(al.length?al.map(x=>`<div class="say" style="background:var(--bg-warning);color:var(--text-warning)">${x}</div>`).join(''):'<div class="how">이번 회기 알림 없음</div>')},
 result:()=>result()};
 const B={
+reg:(q,a)=>{const r=a.reg,o=document.getElementById('regOut');const up=()=>{const b=bmiOf(+r.ht,+r.wt);o.innerHTML=`등록번호 <b>${r.id}</b> 자동 발급 · 나이 ${ageOf(r.birth)??'-'}세 · BMI ${b??'-'} ${bmiC(b)}`};
+qa('[data-rg]').forEach(x=>x.oninput=()=>{r[x.dataset.rg]=x.type==='number'?+x.value:x.value;up()});qa('[data-sx]').forEach(b=>b.onclick=()=>{r.sex=b.dataset.sx;render()})},
+demo:(q,a)=>{qa('[data-dm]').forEach(x=>x.oninput=()=>{a.demo[x.dataset.dm]=isNaN(+x.value)||x.value===''?x.value:+x.value;if(x.dataset.dm==='live')render()});
+qa('[data-is]').forEach(b=>b.onclick=()=>{let v=a.demo.src;const m=b.dataset.is;if(m==='없음')v=['없음'];else{v=v.filter(x=>x!=='없음');v.includes(m)?v.splice(v.indexOf(m),1):v.push(m)}a.demo.src=v;render()})},
+who:(q,a)=>qa('[data-who]').forEach(b=>b.onclick=()=>{a.who=b.dataset.who;render()}),
+body:(q,a)=>{const w=document.getElementById('pwt'),s2=document.getElementById('pws');w.oninput=()=>{a.wt=+w.value;const r=A.pre.reg||{},b0=bmiOf(+r.ht,+r.wt),b1=bmiOf(+r.ht,a.wt);document.getElementById('bOut').textContent=`사전 ${r.wt||'-'} kg (BMI ${b0??'-'}) → 지금 ${a.wt||'-'} kg (BMI ${b1??'-'} ${bmiC(b1)})`};s2.oninput=()=>a.wsrc=s2.value},
 ch:(q,a)=>qa('.op[data-v]').forEach(b=>b.onclick=()=>{a[q.id]=isNaN(+b.dataset.v)?b.dataset.v:+b.dataset.v;render()}),
 num:(q,a)=>{const n=document.getElementById('nv');n.oninput=()=>a[q.id]=n.value},
 bal:(q,a)=>qa('[data-bal]').forEach(b=>b.onclick=()=>{a.bal=+b.dataset.bal;render()}),
@@ -216,47 +266,68 @@ c.onpointerdown=e=>{d=true;c.setPointerCapture(e.pointerId);const[u,v]=p(e);x.be
 c.onpointermove=e=>{if(!d)return;const[u,v]=p(e);x.lineTo(u,v);x.stroke()};
 c.onpointerup=()=>{d=false;a.clockImg=c.toDataURL('image/png')};
 document.getElementById('clkC').onclick=()=>{delete a.clockImg;base()}}
-const GW=160,GH=90;
+let GW=160,GH=90;
 function toGray(d){const g=new Float32Array(GW*GH);for(let p=0,k=0;p<GW*GH;p++,k+=4)g[p]=(d[k]*0.299+d[k+1]*0.587+d[k+2]*0.114);return g}
 function meanOf(g){let s=0;for(let p=0;p<g.length;p++)s+=g[p];return s/g.length}
 function detectPerson(cur,bg,th){const dm=meanOf(cur)-meanOf(bg);const col=new Uint16Array(GW);
 for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const p=y*GW+x;if(Math.abs(cur[p]-bg[p]-dm)>th)col[x]++}
 let best=null,s=-1,gap=0;const need=GH*0.25;
 for(let x=0;x<=GW;x++){const on=x<GW&&col[x]>need;if(on){if(s<0)s=x;gap=0}else if(s>=0){gap++;if(gap>2||x===GW){const e=x-gap;const w=e-s+1;if(w>=4&&w<=GW*0.6&&(!best||w>best.w))best={s,e,w};s=-1;gap=0}}}
-if(!best)return null;let fg=0;for(let x=best.s;x<=best.e;x++)fg+=col[x];
-return{cx:(best.s+best.e+1)/2/GW,x0:best.s,x1:best.e+1,fill:fg/(best.w*GH)}}
-function gaitCam(a){a.gait=a.gait||{d:4};const vd=document.getElementById('cv'),co=document.getElementById('co'),msg=document.getElementById('cmsg'),gt=document.getElementById('gt'),go=document.getElementById('gOut'),vb=document.getElementById('vbox'),gd=document.getElementById('gd'),sens=document.getElementById('sens');
-const sc=document.createElement('canvas');sc.width=GW;sc.height=GH;const sx=sc.getContext('2d',{willReadFrequently:true});
-let L=[0.15,0.85],drag=-1,st='idle',t0=0,bg=null,learn=[],noise=8,th=24,pcx=null,first=-1,seen=0,run=null,cxNow=null,ready=false;
+if(!best)return null;let fg=0,wx=0;for(let x=best.s;x<=best.e;x++){fg+=col[x];wx+=col[x]*(x+0.5)}
+return{cx:wx/fg/GW,x0:best.s,x1:best.e+1,fill:fg/(best.w*GH)}}
+function gaitCam(a){a.gait=a.gait||{d:4};if(a.gait.t&&!a.gait.trials)a.gait.trials=[a.gait.t];
+const vd=document.getElementById('cv'),co=document.getElementById('co'),msg=document.getElementById('cmsg'),hud=document.getElementById('hud'),go=document.getElementById('gOut'),tr=document.getElementById('gTr'),vb=document.getElementById('vbox'),gd=document.getElementById('gd'),sens=document.getElementById('sens'),rot=document.getElementById('rot'),wrap=document.getElementById('gwrap');
+const sc=document.createElement('canvas');const sx=sc.getContext('2d',{willReadFrequently:true});
+let L=[0.15,0.85],drag=-1,st='idle',t0=0,bg=null,learn=[],noise=8,th=24,pcx=null,pft=0,first=-1,seen=0,run=null,ready=false,vw=0,vh=0,ft=0;
 const dist=()=>Math.max(0.5,+gd.value||4);
 const lampD=document.getElementById('lampDot'),lampT=document.getElementById('lampTxt');let lampK='';
-const lamp=(k)=>{if(k===lampK)return;lampK=k;const M={off:['#777','대기 전'],none:['#ff2d2d','사람 없음'],ready:['#22c55e','사람 인식됨: 준비 완료'],run:['#f59e0b','측정 중'],done:['#3b82f6','측정 완료']};lampD.style.background=M[k][0];lampT.textContent=M[k][1]};
-const show=()=>{go.textContent=a.gait.na?'실시 불가: 보행 0점':a.gait.t?`${(a.gait.d/a.gait.t).toFixed(2)} m/s · SPPB 보행 ${gaitP(a.gait)}점`:'';if(st!=='run')gt.textContent=(a.gait.t||0).toFixed(2)+'초'};show();lamp('off');
+const lamp=k=>{if(k===lampK)return;lampK=k;const M={off:['#777','대기 전'],none:['#ff2d2d','사람 없음'],ready:['#22c55e','사람 인식됨: 준비 완료'],run:['#f59e0b','측정 중'],done:['#3b82f6','측정 완료']};lampD.style.background=M[k][0];lampT.textContent=M[k][1]};
+const sp=t=>(dist()/t).toFixed(2);
+const show=()=>{const T=a.gait.trials||[];tr.innerHTML=T.length?T.map((t,k)=>`${k+1}회 ${t.toFixed(2)}초 (${sp(t)} m/s)${t===a.gait.t?' <b>채택</b>':''}`).join(' · '):'';
+go.textContent=a.gait.na?'실시 불가: 보행 0점':a.gait.t?`채택 ${a.gait.t.toFixed(2)}초 · ${sp(a.gait.t)} m/s · SPPB 보행 ${gaitP(a.gait)}점${T.length<2?' · 1회 더 재 주세요':''}`:'';
+if(st!=='run')hud.textContent=a.gait.t?`${a.gait.t.toFixed(2)}초 · ${sp(a.gait.t)} m/s · ${T.length}/2회`:'0.00초'};show();lamp('off');
+const portrait=()=>vw&&vh?vh>vw:innerHeight>innerWidth;
+const fit=()=>{if(document.fullscreenElement||document.webkitFullscreenElement){vb.style.width='';return}const ar=vw&&vh?vw/vh:16/9;const maxW=innerWidth>innerHeight?(innerHeight-24)*ar:9999;vb.style.width=Math.min(vb.parentElement.clientWidth,maxW)+'px';setTimeout(draw,50)};
+window.onresize=fit;
+const resetDims=()=>{vw=vd.videoWidth;vh=vd.videoHeight;if(!vw)return;vb.style.aspectRatio=vw+'/'+vh;GW=160;GH=Math.max(40,Math.round(160*vh/vw));sc.width=GW;sc.height=GH;bg=null;run=null;ready=false;if(st!=='idle'){st='idle';msg.textContent='화면 방향이 바뀌었습니다. 측정 대기를 다시 눌러 주세요'}fit()};
+vd.onresize=resetDims;
 const draw=()=>{const w=co.width=co.clientWidth,h=co.height=co.clientHeight,g=co.getContext('2d');g.clearRect(0,0,w,h);
 if(run){g.fillStyle='rgba(34,211,182,0.25)';g.fillRect(run.x0/GW*w,0,(run.x1-run.x0)/GW*w,h);g.fillStyle='#22d3b6';g.beginPath();g.arc(run.cx*w,h/2,7,0,Math.PI*2);g.fill()}
-L.forEach((l,k)=>{const x=l*w;g.strokeStyle='#ff2d2d';g.lineWidth=4;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillStyle='#ff2d2d';g.font='bold 15px sans-serif';g.fillText(k?dist()+'m 선':'시작선',Math.min(Math.max(x-24,4),w-60),h-12);g.beginPath();g.arc(x,h/2,10,0,Math.PI*2);g.fill()})};
-gd.oninput=draw;
+L.forEach((l,k)=>{const x=l*w;g.strokeStyle='#ff2d2d';g.lineWidth=4;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillStyle='#ff2d2d';g.font='bold 15px sans-serif';g.fillText(k?dist()+'m 선':'시작선',Math.min(Math.max(x-24,4),w-60),h-48);g.beginPath();g.arc(x,h/2,10,0,Math.PI*2);g.fill()});
+g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1;g.setLineDash&&g.setLineDash([6,6]);g.beginPath();g.moveTo(0,h*0.85);g.lineTo(w,h*0.85);g.stroke();g.setLineDash&&g.setLineDash([])};
+gd.oninput=()=>{draw();show()};
 co.onpointerdown=e=>{const r=co.getBoundingClientRect(),f=(e.clientX-r.left)/r.width;const k=Math.abs(f-L[0])<Math.abs(f-L[1])?0:1;if(Math.abs(f-L[k])<0.08){drag=k;co.setPointerCapture(e.pointerId)}};
 co.onpointermove=e=>{if(drag<0)return;const r=co.getBoundingClientRect();L[drag]=Math.min(0.98,Math.max(0.02,(e.clientX-r.left)/r.width));draw()};
 co.onpointerup=()=>{drag=-1};
 const setTh=()=>{th=Math.max(18,noise*3)*(1.6-(+sens.value-8)/40)};sens.oninput=setTh;
-const loop=()=>{if(!stream)return;sx.drawImage(vd,0,0,GW,GH);const cur=toGray(sx.getImageData(0,0,GW,GH).data);const now=performance.now()/1000;
+const step=fts=>{if(!stream)return;ft=fts;
+if(portrait()){rot.style.display='flex';if(st!=='idle'&&st!=='done'){st='idle';bg=null}run=null;lamp('off');draw();return}rot.style.display='none';
+if(!GW||sc.width!==GW){sc.width=GW;sc.height=GH}
+sx.drawImage(vd,0,0,GW,GH);const cur=toGray(sx.getImageData(0,0,GW,GH).data);
 if(st==='learn'){learn.push(cur);if(learn.length>=30){bg=new Float32Array(GW*GH);learn.forEach(f=>{for(let p=0;p<bg.length;p++)bg[p]+=f[p]/learn.length});
 let nz=0;learn.forEach(f=>{let s=0;for(let p=0;p<bg.length;p++)s+=Math.abs(f[p]-bg[p]);nz+=s/bg.length});noise=nz/learn.length;setTh();learn=[];
 const chk=detectPerson(cur,bg,th);if(chk){st='idle';bg=null;msg.textContent='화면이 흔들리거나 움직이는 것이 있습니다. 휴대폰을 고정하고 다시 측정 대기를 누르세요'}else{st='armed';pcx=null;first=-1;seen=0;ready=false;msg.textContent='이용자가 시작선 바깥에 서면 초록불이 켜집니다. 초록불 확인 후 출발하세요'}}}
-else if(bg&&(st==='armed'||st==='run')){const m=detectPerson(cur,bg,th);seen=m?seen+1:0;run=seen>=3?m:null;if(st==='armed'){if(!run){ready=false;pcx=null}else if(seen>=15)ready=true}
-if(run&&pcx!==null){const crossed=k=>(pcx-L[k])*(run.cx-L[k])<=0&&pcx!==run.cx;
-if(st==='armed'&&ready){for(const k of[0,1])if(crossed(k)){st='run';first=k;t0=now;msg.textContent='출발 감지: 측정 중';break}}
-else if(st==='run'&&crossed(1-first)){const t=now-t0,v=dist()/t;if(t>1&&v>=0.1&&v<=2.5){st='done';lamp('done');a.gait={t:Math.round(t*100)/100,d:dist()};msg.textContent='도착 감지: 측정 완료. 다시 재려면 측정 대기를 누르세요';show()}else{st='armed';ready=false;msg.textContent='비정상 속도라 버렸습니다. 다시 대기 중'}}}
-if(run)pcx=run.cx;lamp(st==='run'?'run':ready&&run?'ready':'none');if(st==='run'){gt.textContent=(now-t0).toFixed(2)+'초';if(now-t0>60){st='armed';msg.textContent='시간 초과. 다시 대기 중'}}}
+else if(bg&&(st==='armed'||st==='run')){const m=detectPerson(cur,bg,th);
+if(!m&&st==='armed')for(let p=0;p<bg.length;p++)bg[p]+=(cur[p]-bg[p])*0.03;
+seen=m?seen+1:0;run=seen>=3?m:null;if(st==='armed'){if(!run){ready=false;pcx=null}else if(seen>=15)ready=true}
+if(run&&pcx!==null&&pcx!==run.cx){const xt=k=>(pcx-L[k])*(run.cx-L[k])<=0?pft+(L[k]-pcx)/(run.cx-pcx)*(ft-pft):null;
+if(st==='armed'&&ready){for(const k of[0,1]){const c=xt(k);if(c!==null){st='run';first=k;t0=c;msg.textContent='출발 감지: 측정 중';break}}}
+else if(st==='run'){const c=xt(1-first);if(c!==null){const t=c-t0,v=dist()/t;if(t>1&&v>=0.1&&v<=2.5){st='done';lamp('done');const T=a.gait.trials=(a.gait.trials||[]).concat(Math.round(t*100)/100).slice(-3);a.gait.t=Math.min(...T);a.gait.d=dist();delete a.gait.na;
+msg.textContent=T.length<2?'1회 완료. 이용자가 돌아와 시작 위치에 서면 측정 대기를 눌러 2회째를 잽니다':'2회 완료. 빠른 기록으로 채점합니다';show()}else{st='armed';ready=false;msg.textContent='비정상 속도라 버렸습니다. 다시 대기 중'}}}}
+if(run){pcx=run.cx;pft=ft}lamp(st==='run'?'run':ready&&run?'ready':'none');if(st==='run'){hud.textContent=(ft-t0).toFixed(2)+'초';if(ft-t0>60){st='armed';msg.textContent='시간 초과. 다시 대기 중'}}}
 else run=null;
-draw();raf=requestAnimationFrame(loop)};
-document.getElementById('camOn').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});vd.srcObject=stream;await vd.play();
-if(vd.videoWidth)vb.style.aspectRatio=vd.videoWidth+'/'+vd.videoHeight;st='idle';msg.textContent='휴대폰을 고정하고 빨간 선을 바닥 테이프에 맞춘 뒤 측정 대기를 누르세요';setTimeout(draw,200);loop()}
+draw()};
+const loop=()=>{if(!stream)return;if(vd.requestVideoFrameCallback)vd.requestVideoFrameCallback((n,md)=>{step(md.mediaTime||performance.now()/1000);loop()});else{step(performance.now()/1000);raf=requestAnimationFrame(loop)}};
+document.getElementById('camOn').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});vd.srcObject=stream;await vd.play();
+resetDims();st='idle';msg.textContent=portrait()?'':'휴대폰을 고정하고 빨간 선을 바닥 테이프에 맞춘 뒤 측정 대기를 누르세요';setTimeout(draw,200);loop()}
 catch(e){msg.textContent='카메라를 열 수 없습니다. 브라우저 카메라 권한을 확인하세요.'}};
-document.getElementById('arm').onclick=()=>{if(!stream){msg.textContent='먼저 카메라를 켜세요';return}st='learn';learn=[];bg=null;run=null;ready=false;lamp('off');delete a.gait.na;gt.textContent='0.00초';msg.textContent='빈 화면 학습 중(1초): 화면 밖에 계셔 주세요'};
-let mt=0;document.getElementById('mStart').onclick=()=>{mt=performance.now();clearInterval(tick);tick=setInterval(()=>gt.textContent=((performance.now()-mt)/1000).toFixed(2)+'초',50)};
-document.getElementById('mStop').onclick=()=>{if(!mt)return;clearInterval(tick);a.gait={t:Math.round((performance.now()-mt)/10)/100,d:dist()};mt=0;show()};
+document.getElementById('fsOn').onclick=async()=>{const rq=wrap.requestFullscreen||wrap.webkitRequestFullscreen;if(!rq){msg.textContent='이 기기는 전체화면을 지원하지 않습니다. 휴대폰을 가로로 돌려 주세요';return}try{await rq.call(wrap);if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape').catch(()=>{});setTimeout(()=>{fit();draw()},300)}catch(e){msg.textContent='전체화면을 열 수 없습니다. 휴대폰을 가로로 돌려 주세요'}};
+document.getElementById('arm').onclick=()=>{if(!stream){msg.textContent='먼저 카메라를 켜세요';return}if(portrait()){msg.textContent='휴대폰을 가로로 돌려 주세요';return}
+if(L[1]-L[0]<0.35){msg.textContent='두 빨간 선 간격이 좁습니다. 휴대폰을 조금 더 멀리 두면 정확도가 올라갑니다';}
+st='learn';learn=[];bg=null;run=null;ready=false;lamp('off');hud.textContent='0.00초';if(L[1]-L[0]>=0.35)msg.textContent='빈 화면 학습 중(1초): 화면 밖에 계셔 주세요'};
+document.getElementById('gClr').onclick=()=>{a.gait={d:dist()};st=stream?'idle':st;show()};
+let mt=0;document.getElementById('mStart').onclick=()=>{mt=performance.now();clearInterval(tick);tick=setInterval(()=>hud.textContent=((performance.now()-mt)/1000).toFixed(2)+'초',50)};
+document.getElementById('mStop').onclick=()=>{if(!mt)return;clearInterval(tick);const t=Math.round((performance.now()-mt)/10)/100;const T=a.gait.trials=(a.gait.trials||[]).concat(t).slice(-3);a.gait.t=Math.min(...T);a.gait.d=dist();delete a.gait.na;mt=0;show()};
 document.getElementById('gNa').onclick=()=>{a.gait={na:1,d:4};show()};draw()}
 function chairT(a){a.chair=a.chair||{};const ct=document.getElementById('ct'),cn=document.getElementById('cn'),out=document.getElementById('cOut');let t0=0;
 const show=()=>{out.textContent=a.chair.na?'실시 불가: 일어서기 0점':a.chair.done?`5회 ${a.chair.t.toFixed(2)}초 · SPPB 일어서기 ${chairP(a.chair)}점`:''};show();
@@ -265,6 +336,9 @@ document.getElementById('cUp').onclick=()=>{if(!t0||a.chair.done)return;a.chair.
 document.getElementById('cRe').onclick=()=>{clearInterval(tick);a.chair={};t0=0;ct.textContent='0.00초';cn.textContent='0 / 5회';show()};
 document.getElementById('cNa').onclick=()=>{clearInterval(tick);a.chair={na:1};t0=0;show()}}
 function valid(q){const a=A[mode];switch(q.t){
+case'reg':{const r=a.reg||{};return!!(r.nm&&r.birth&&r.sex&&r.ht>0&&r.wt>0&&r.wsrc)}
+case'demo':{const d=a.demo||{};return DEMO.every(([k])=>d[k]!==undefined&&d[k]!=='')&&(d.src||[]).length>0}
+case'who':return!!a.who;case'body':return a.wt>0&&!!a.wsrc;
 case'ch':return a[q.id]!==undefined;case'num':return a[q.id]!==undefined&&a[q.id]!==''&&+a[q.id]>=q.min&&+a[q.id]<=q.max;
 case'bal':return a.bal!==undefined&&a.bal!=='';case'gait':return a.gait&&(a.gait.na||a.gait.t>0);case'chair':return a.chair&&(a.chair.na||a.chair.done);
 case'grip':return a.grip&&(a.grip.na||gMax(a.grip)>0);case'kmbi':return KM.every((_,j)=>a['km'+j]);case'eq':return[0,1,2,3,4].every(j=>a['eq'+j]);case'lsa':return(a.lsa||[]).length===5&&a.lsa.every(r=>r&&(r.go===0||(r.go===1&&r.f)));
@@ -273,7 +347,7 @@ case'gas':return!!(a.goals&&a.goals[0]&&a.goals[0].lib&&a.goals[0].base);case'ga
 const J=(d,t)=>d>=t?['개선','success']:d<=-t?['악화','danger']:['유지','neutral'];
 const tg=(t,k)=>`<span class="tag" style="background:var(--bg-${k});color:var(--text-${k})">${t}</span>`;
 function result(){const p=A.pre,q=A.post;const s0=stg(+p.fac,p.sit),s1=stg(+q.fac,q.sit),core=[];
-let h=`<div class="how">저장 시 「사후평가」와 「결과」 시트에 각 1행 추가</div><div class="rr" style="font-weight:500"><div>항목</div><div>사전 → 사후</div><div>판정 (기준)</div></div>`;
+const r=p.reg||{},b0=bmiOf(+r.ht,+r.wt),b1=bmiOf(+r.ht,+q.wt);let h=`<div style="font-size:16px;font-weight:600;margin-bottom:4px">${r.nm||''} 님 · ${r.id||''} · ${ageOf(r.birth)??''}세 ${r.sex||''}</div><div class="how">저장 시 「사후평가」와 「결과」 시트에 각 1행 추가</div><div class="rr" style="font-weight:500"><div>항목</div><div>사전 → 사후</div><div>판정 (기준)</div></div>`;
 const add=(n,v,j,c)=>{h+=`<div class="rr"><div>${n}</div><div>${v}</div><div>${tg(j[0],j[1])} ${c}</div></div>`};
 let j=J(s1-s0,1);core.push(j[0]);add('기능 단계',`${s0} → ${s1}단계`,j,'1단계');
 if(p.fac>=3&&q.fac>=3){const a=spTot(p),b=spTot(q);j=J(b-a,1);core.push(j[0]);add('SPPB',`${a} → ${b}`,j,'1.0점');
@@ -283,6 +357,7 @@ const k0=kmTot(p),k1=kmTot(q);j=J(k1-k0,15);core.push(j[0]);add('K-MBI',`${k0} �
 const l0=lsaTot(p),l1=lsaTot(q);add('K-LSA (참여)',`${l0} → ${l1} (${l1-l0>0?'+':''}${l1-l0})`,['참고','neutral'],'기준 미확정');
 add('손가락 고리',`${p.yubi} → ${q.yubi}`,q.yubi==='작음'?['근감소 의심','warning']:['참고','neutral'],'');
 if(+p.nrs>=1)add('통증 NRS',`${p.nrs} → ${q.nrs} (${p.ptype})`,J(p.nrs-q.nrs,2),'개인 2점');
+if(b0&&b1){const dw=Math.round((q.wt-r.wt)*10)/10,pc=dw/r.wt*100;add('몸무게',`${r.wt} → ${q.wt} kg (BMI ${b0} → ${b1})`,pc<=-5?['5% 이상 감소','warning']:['참고','neutral'],'5% 감소 시 영양 확인')}
 add('EQ-5D VAS',`${p.vas} → ${q.vas}`,['참고','neutral'],'효용값은 한국 가치세트');
 const gs=(p.goals||[]).filter(g=>g.lib&&g.base),xs=gs.map((G,g)=>gasScore(+G.base,+(q.achv||[])[g]));
 const T=xs.length?Math.round((50+10*xs.reduce((x,y)=>x+y,0)/Math.sqrt(0.7*xs.length+0.3*xs.length**2))*10)/10:'-';
