@@ -49,6 +49,36 @@ svg text{font-family:inherit}
 .ulist div{display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
 .ulist div.sel{background:var(--pri2)}
 </style>
+<style>
+:root{--bg:#f2f2f7;--card:#fff;--ink:#000;--sub:rgba(60,60,67,.62);--line:rgba(60,60,67,.16);--pri:#007aff;--pri2:#e8f1ff;--ok:#248a3d;--ok2:#e9f9ee;--warn:#c25e00;--warn2:#fff4e5;--bad:#d70015;--bad2:#ffecec;--gray:#aeaeb2}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
+header{background:rgba(249,249,249,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:0.5px solid var(--line);padding:14px 16px 10px}
+h1{font-size:clamp(20px,5.6vw,28px);font-weight:700;margin:0 0 10px}
+#tabs{display:inline-flex;background:rgba(118,118,128,.12);border-radius:9px;padding:2px;gap:0}
+#tabs button{border:0;background:transparent;border-radius:7px;padding:5px 14px;font-weight:500;color:var(--ink)}
+#tabs button.on{background:#fff;color:var(--ink);border:0;box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+.tabs button{border:0;background:rgba(118,118,128,.12);color:var(--pri);border-radius:999px;font-weight:500}
+.tabs button.on{background:var(--pri);color:#fff}
+main{padding:18px 16px}
+.card{border:0;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:20px;font-weight:700}
+th{background:transparent;color:var(--sub);font-weight:600;font-size:12px;text-transform:none}
+th,td{border-bottom:0.5px solid var(--line);padding:9px 8px}
+.kpi{background:#f2f2f7;border:0;border-radius:14px;padding:12px 14px}.kpi b{font-size:26px;font-weight:700;letter-spacing:-0.02em}
+.tag{border-radius:6px}
+.btn{border:0;background:rgba(118,118,128,.12);color:var(--pri);border-radius:999px;padding:6px 14px;font-weight:500}
+.btn.f{background:var(--pri);color:#fff}
+.idbar select{border:0;background:#fff;border-radius:12px;min-height:44px;padding:8px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.phone{border:10px solid #1c1c1e;border-radius:48px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.phone .bar{background:rgba(249,249,249,.9);color:#000;border-bottom:0.5px solid var(--line);padding:14px 18px 10px;font-size:17px;font-weight:600}
+.phone .bar span:last-child{font-size:12px;color:var(--sub);font-weight:400;align-self:center}
+.wide{border:0;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.wide .bar{background:rgba(249,249,249,.95);color:#000;border-bottom:0.5px solid var(--line);font-size:16px}
+.wide .bar span:last-child{color:var(--sub);font-weight:400;font-size:13px}
+.lock{border:0;background:var(--bad2);border-radius:12px}
+.ulist div{border-bottom:0.5px solid var(--line);padding:12px 6px;border-radius:0}
+.ulist div.sel{background:var(--pri2);border-radius:10px}
+</style>
 </head>
 <body>
 <header>
