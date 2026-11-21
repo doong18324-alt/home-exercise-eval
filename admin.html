@@ -111,12 +111,14 @@ const ACCTS=[
  {id:'GS01-2611-003',nm:'이용자',role:'이용자·보호자',org:'GS01',scope:'본인 1명',st:'사용(열람코드)'}
 ];
 const NM={'GS01-2611-003':'김순자 · 78세 여','GS01-2611-007':'박영식 · 82세 남','GS01-2611-009':'이말순 · 74세 여','GS01-2611-012':'최정남 · 80세 남','GS01-2611-015':'정옥희 · 87세 여','GS01-2611-018':'한복례 · 76세 여'};
+const PD=[[[-15,5,-14,-4,-42,4,-3,-3],[2,12,-7,2,-42,21,13,12]],[[-30,-15,-22,-10,-50,-6,-10,-10],[-28,-13,-20,-9,-50,-4,-10,-8]],[[18,16,22,8,38,14,16,12],[26,22,30,12,38,18,18,16]],[[-12,-4,-8,-2,-10,-8,-6,-4],[-14,-6,-10,-2,-10,-10,-8,-6]],[[-44,-40,-28,-26,-30,-18,-10,-20],[-38,-30,-24,-22,-30,-14,-8,-16]],[[10,8,12,6,20,6,4,6],null]];
+const PT=[['인지 저하 의심','노쇠 전단계','낙상 고위험','다약제','독거'],['인지 저하 의심','노쇠','돌봄 공백'],[],['낙상 고위험','통증 동반'],['노쇠','근감소 의심','영양 위험','우울 선별 양성'],['시각·청각 저하']];
 const MY=[ // 제공인력 gs01-p03 담당 이용자
- {id:'GS01-2611-003',st:'3→4',ses:12,al:[],cond:[3,3,4,3,4,4,4,5,4,4,5,5],fol:[2,3,3,3,4,4,4,4,4,5,5,5],ctx:[3,3,3,4,4,4,4,4,5,5,5,5]},
- {id:'GS01-2611-007',st:'2→2',ses:12,al:['참여 2점 이하 3회 연속'],cond:[3,3,3,2,3,3,3,3,2,3,3,3],fol:[3,3,2,2,2,2,3,2,2,2,2,2],ctx:[2,2,2,2,3,2,2,2,2,2,2,2]},
- {id:'GS01-2611-009',st:'4→5',ses:12,al:[],cond:[4,4,4,4,5,5,4,5,5,5,5,5],fol:[4,4,5,4,5,5,5,5,5,5,5,5],ctx:[4,4,4,4,4,5,5,5,5,5,5,5]},
- {id:'GS01-2611-012',st:'3→3',ses:8,al:['낙상 1회 보고'],cond:[3,3,2,3,3,2,2,3],fol:[3,3,3,3,3,3,3,3],ctx:[3,3,3,3,3,3,3,3]},
- {id:'GS01-2611-015',st:'1→2',ses:12,al:['보호자 참여 권장'],cond:[2,2,3,2,3,3,3,3,3,3,4,3],fol:[2,2,2,3,3,3,3,3,3,3,4,4],ctx:[1,1,2,2,2,2,2,2,3,2,2,2]},
+ {id:'GS01-2611-003',st:'Ⅲ→Ⅳ',ses:12,al:[],cond:[3,3,4,3,4,4,4,5,4,4,5,5],fol:[2,3,3,3,4,4,4,4,4,5,5,5],ctx:[3,3,3,4,4,4,4,4,5,5,5,5]},
+ {id:'GS01-2611-007',st:'Ⅱ→Ⅱ',ses:12,al:['참여 2점 이하 3회 연속'],cond:[3,3,3,2,3,3,3,3,2,3,3,3],fol:[3,3,2,2,2,2,3,2,2,2,2,2],ctx:[2,2,2,2,3,2,2,2,2,2,2,2]},
+ {id:'GS01-2611-009',st:'Ⅳ→Ⅴ',ses:12,al:[],cond:[4,4,4,4,5,5,4,5,5,5,5,5],fol:[4,4,5,4,5,5,5,5,5,5,5,5],ctx:[4,4,4,4,4,5,5,5,5,5,5,5]},
+ {id:'GS01-2611-012',st:'Ⅲ→Ⅲ',ses:8,al:['낙상 1회 보고'],cond:[3,3,2,3,3,2,2,3],fol:[3,3,3,3,3,3,3,3],ctx:[3,3,3,3,3,3,3,3]},
+ {id:'GS01-2611-015',st:'Ⅰ→Ⅱ',ses:12,al:['보호자 참여 권장'],cond:[2,2,3,2,3,3,3,3,3,3,4,3],fol:[2,2,2,3,3,3,3,3,3,3,4,4],ctx:[1,1,2,2,2,2,2,2,3,2,2,2]},
  {id:'GS01-2611-018',st:'사전만',ses:3,al:['사후평가 예정 3주'],cond:[3,4,3],fol:[3,3,4],ctx:[3,3,3]}
 ];
 const ROLES=['총괄관리자','발주기관','연구원','기관관리자','제공인력','이용자·보호자'];
@@ -140,6 +142,37 @@ function lines(series,n,ymin,ymax,labels,step){step=step||1; // [{v:[],c,n}]
  return s+'</svg>';
 }
 const C1='#2f5bd3',C2='#1f8a4c',C3='#b7791f';
+/* ---------- 통합기능점수·레이더 ---------- */
+let W={phys:25,adl:20,ls:15,str:10,cog:10,vit:10,mood:5,qol:5};
+const DN={phys:'신체수행',adl:'일상생활',ls:'생활반경',str:'근력',cog:'인지',vit:'활력·영양',mood:'정서',qol:'삶의 질'};
+const DK=Object.keys(DN);
+const tot=o=>{let s=0,w=0;DK.forEach(k=>{if(o[k]!=null){s+=W[k]*o[k];w+=W[k]}});return w?Math.round(s/w):null};
+const PAL=['#007aff','#ff9500','#34c759','#af52de','#ff2d55','#5ac8fa','#8e8e93'];
+function radarSVG(sets,size=320){const N=DK.length,cx=size/2,cy=size/2-5,R=size*0.32;const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/N;return[cx+R*v/100*Math.cos(a),cy+R*v/100*Math.sin(a)]};
+ let s=`<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:${size+40}px;display:block;margin:0 auto">`;
+ [25,50,75,100].forEach(r=>s+=`<polygon points="${DK.map((_,i)=>pt(i,r).join(',')).join(' ')}" fill="none" stroke="#d1d1d6"/>`);
+ DK.forEach((k,i)=>{const[x,y]=pt(i,100),[lx,ly]=pt(i,118);s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#d1d1d6"/><text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="11.5" fill="#6e6e73">${DN[k]}</text>`});
+ sets.forEach(st=>s+=`<polygon points="${DK.map((k,i)=>pt(i,st.o[k]??0).join(',')).join(' ')}" fill="${st.c}" fill-opacity="${st.f??0.12}" stroke="${st.c}" stroke-width="2"/>`);
+ return s+'</svg>'}
+const radarLeg=sets=>`<div class="legend" style="justify-content:center;margin-top:4px">${sets.map(st=>`<span><i style="background:${st.c};height:10px;width:10px;border-radius:3px"></i>${st.n} <b>${tot(st.o)}점</b>${st.cnt!=null?` (n=${st.cnt})`:''}</span>`).join('')}</div>`;
+const mk=(base,adj)=>{const o={};DK.forEach((k,i)=>o[k]=Math.max(0,Math.min(100,Math.round(base[i]+(adj[i]||0)))));return o};
+const BASE=[48,68,30,55,62,64,70,58];
+const GROUPS={
+ '자치구':[['동구',38,[-4,-3,-5,-2,-3,-2,-4,-3]],['서구',61,[2,3,4,1,2,1,3,2]],['남구',47,[0,1,-1,2,0,1,0,1]],['북구',72,[3,2,6,2,1,2,2,3]],['광산구',82,[5,4,7,3,4,3,2,4]]],
+ '행정동(광산구)':[['신가동',24,[4,3,6,2,3,2,2,3]],['수완동',19,[7,6,9,4,6,4,4,6]],['첨단1동',14,[2,1,3,1,0,1,1,2]],['월곡1동',4,[0,0,0,0,0,0,0,0]],['하남동',21,[3,3,5,3,2,3,1,3]]],
+ '연령대':[['65~74세',96,[12,10,14,6,10,8,4,8]],['75~84세',138,[0,0,0,0,0,0,0,0]],['85세 이상',66,[-14,-12,-15,-8,-16,-10,-6,-10]]],
+ '성별':[['여성',204,[-2,1,-3,-6,0,1,-2,-1]],['남성',96,[4,-2,5,10,0,-1,3,2]]],
+ '동거 형태':[['독거',118,[1,2,-4,0,-1,-6,-12,-5]],['배우자·가족 동거',182,[-1,-1,3,0,1,4,8,3]]],
+ '시작 표현형':[['Ⅰ 침상 제한형',18,[-45,-50,-28,-30,-15,-20,-15,-25]],['Ⅱ 좌위 제한형',41,[-38,-30,-22,-20,-8,-12,-10,-15]],['Ⅲ 실내 의존형',87,[-22,-12,-12,-8,-4,-5,-5,-6]],['Ⅳ 실내 자립형',109,[10,10,6,6,3,4,3,5]],['Ⅴ 실외 활동형',45,[30,24,30,18,8,12,10,14]]],
+};
+let grpKey='자치구',grpTime='post';
+function groupRadar(){const g=GROUPS[grpKey];const shown=g.filter(x=>x[1]>=5);const amp=grpKey==='자치구'||grpKey.startsWith('행정동')?2.5:1;const sets=shown.map((x,i)=>({n:x[0],cnt:x[1],c:PAL[i%PAL.length],f:0.06,o:mk(BASE,x[2].map(v=>v*amp+(grpTime==='post'?6:0)))}));
+ const hid=g.filter(x=>x[1]<5);
+ return `<div class="tabs" style="margin-bottom:8px">${Object.keys(GROUPS).map(k=>`<button data-g="${k}" class="${k===grpKey?'on':''}">${k}</button>`).join('')}</div>
+ <div class="tabs" style="margin-bottom:6px">${[['pre','사전'],['post','사후']].map(t=>`<button data-gt="${t[0]}" class="${t[0]===grpTime?'on':''}">${t[1]}</button>`).join('')}</div>
+ ${radarSVG(sets,340)}${radarLeg(sets)}
+ <div class="scroll" style="margin-top:8px"><table style="min-width:680px"><tr><th>그룹</th><th>n</th>${DK.map(k=>`<th>${DN[k]}</th>`).join('')}<th>통합</th></tr>${sets.map(st=>`<tr><td>${st.n}</td><td>${st.cnt}</td>${DK.map(k=>`<td>${st.o[k]}</td>`).join('')}<td><b>${tot(st.o)}</b></td></tr>`).join('')}${hid.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td colspan="${DK.length+1}" class="note">5명 미만이라 집계를 공개하지 않습니다</td></tr>`).join('')}</table></div>
+ <p class="note">예시 자료입니다. 기관 비교는 이용자 특성 보정값으로 보여 주고, 5명 미만인 그룹은 개인 식별과 불안정한 평균을 막기 위해 숨깁니다.</p>`}
 const leg=a=>`<div class="legend">${a.map(x=>`<span><i style="background:${x[1]}"></i>${x[0]}</span>`).join('')}</div>`;
 
 /* ---------- ① 구조도 ---------- */
@@ -179,7 +212,7 @@ function arch(){
  <tr><th>항목</th><th>방식</th></tr>
  <tr><td>계정 발급</td><td>총괄관리자만 생성. 기관관리자는 소속 제공인력 추가를 <b>요청</b>만 하고, 총괄관리자가 승인</td></tr>
  <tr><td>권한 범위</td><td>역할 + 소속 기관 + 배정 이용자로 자동 제한. 서버가 매 요청마다 검사</td></tr>
- <tr><td>개인 식별</td><td>제공인력이 이름으로 등록하면 등록번호가 자동 발급됨. 이름·생년월일·연락처는 「식별정보」 파일에만, 평가 기록은 등록번호로만 저장. 연구원·발주기관은 식별정보를 볼 수 없음</td></tr>
+ <tr><td>개인 식별</td><td>식별정보 저장소의 관리 권한은 광주사회서비스원(gsso01)에 있으며, 총괄관리자와 연구원 계정은 식별정보를 볼 수 없음(IRB 계획서와 일치). 제공인력이 이름으로 등록하면 등록번호가 자동 발급됨. 이름·생년월일·연락처는 「식별정보」 파일에만, 평가 기록은 등록번호로만 저장. 연구원·발주기관은 식별정보를 볼 수 없음</td></tr>
  <tr><td>원자료 반출</td><td>총괄관리자와 연구원만 가능. 반출 시 기록이 자동으로 남음</td></tr>
  <tr><td>기준값·문항 변경</td><td>총괄관리자만. 변경 시 버전 번호를 붙여 이전 자료와 구분</td></tr>
  <tr><td>접근 기록</td><td>누가, 언제, 어떤 화면·자료를 봤는지 전부 기록. 총괄관리자만 열람</td></tr>
@@ -190,7 +223,7 @@ function arch(){
 function perm(){
  const P=[
  ['평가 입력 (사전·회기·사후)','n','n','n','n','y','n'],
- ['이름·연락처 (식별정보) 열람','y','n','n','p','p','p'],
+ ['이름·연락처 (식별정보) 열람','n','y','n','p','p','p'],
  ['입력 수정','y','n','n','p','p','n'],
  ['개인 결과지 열람','y','n','n','p','p','y'],
  ['회기 궤적 · 알림','y','n','n','p','p','n'],
@@ -213,7 +246,7 @@ function perm(){
 }
 
 /* ---------- ③ 아이디별 화면 ---------- */
-let cur='admin01',adminTab='acct',selU=0;
+let cur='admin01',adminTab='grp',selU=0;
 function view(){
  const opts=ACCTS.filter(a=>a.id!=='bk01-mgr'&&a.id!=='gs01-p04').map(a=>`<option value="${a.id}" ${a.id==cur?'selected':''}>${a.id} · ${a.role}</option>`).join('');
  return `<div class="idbar"><b>로그인 아이디</b><select id="idsel">${opts}</select></div><div id="scr">${screen()}</div>`;
@@ -232,12 +265,13 @@ const phone=(t,a,b)=>`<div class="phone"><div class="bar"><span>${t}</span><span
 
 function admin(){
  const k=`<div class="kpis"><div class="kpi"><b>5</b><span>기관</span></div><div class="kpi"><b>14</b><span>제공인력</span></div><div class="kpi"><b>78</b><span>이용자</span></div><div class="kpi"><b>1,236</b><span>회기 기록</span></div><div class="kpi"><b style="color:var(--warn)">1</b><span>승인 대기 계정</span></div></div>`;
- const tb=[['acct','계정 관리'],['role','권한 설정'],['th','기준값'],['log','접근 기록'],['exp','자료 내보내기'],['all','전체 화면 보기']];
+ const tb=[['grp','그룹 비교'],['acct','계정 관리'],['role','권한 설정'],['th','기준값'],['log','접근 기록'],['exp','자료 내보내기'],['all','전체 화면 보기']];
  const nav=`<div class="tabs" style="margin:12px 0">${tb.map(t=>`<button data-a="${t[0]}" class="${adminTab==t[0]?'on':''}">${t[1]}</button>`).join('')}</div>`;
  let b='';
  if(adminTab=='acct')b=`<div class="card"><h2>계정 관리 <button class="btn f" style="float:right">+ 계정 발급</button></h2><div class="scroll"><table><tr><th>아이디</th><th>역할</th><th>소속</th><th>범위</th><th>상태</th><th></th></tr>
  ${ACCTS.map(a=>`<tr><td>${a.id}</td><td>${a.role}</td><td>${a.org}</td><td>${a.scope}</td><td>${a.st=='승인 대기'?'<span class="tag t-warn">승인 대기</span>':'<span class="tag t-ok">'+a.st+'</span>'}</td><td>${a.st=='승인 대기'?'<button class="btn f">승인</button> <button class="btn">거절</button>':(a.role=='총괄관리자'?'':'<button class="btn">권한 변경</button> <button class="btn">중지</button>')}</td></tr>`).join('')}</table></div>
  <p class="note">gs01-p04는 A복지관 팀장이 요청한 계정입니다. 승인해야 사용할 수 있습니다.</p></div>`;
+ if(adminTab=='grp')b=`<div class="card"><h2>그룹별 통합기능점수 비교</h2>${groupRadar()}</div>`;
  if(adminTab=='role')b=`<div class="card"><h2>권한 설정</h2><p class="note">역할별 기본 권한을 켜고 끕니다. 바꾸면 해당 역할 전체 계정에 바로 반영됩니다.</p>${perm().split('<div class="card"><h2>예시 계정')[0].replace('<div class="card"><h2>역할별 권한</h2>','').replace(/<\/div>$/,'')}
  <h3>예외 설정 (개별 계정)</h3><table><tr><th>아이디</th><th>추가 권한</th><th>기한</th><th></th></tr><tr><td>gs01-mgr</td><td>BK01 기관 대시보드 열람 (기관 간 교육용)</td><td>2026-12-31</td><td><button class="btn">해제</button></td></tr></table></div>`;
  if(adminTab=='th')b=`<div class="card"><h2>판정 기준값 <span class="tag t-pri">현재 버전 v1.2</span></h2><table><tr><th>지표</th><th>개선 판정 기준</th><th>근거</th><th></th></tr>
@@ -247,6 +281,7 @@ function admin(){
  <tr><td>NRS</td><td>-2점</td><td>개인 기준</td><td><button class="btn">수정</button></td></tr>
  <tr><td>악력</td><td>남 28 kg / 여 18 kg 기준선</td><td>AWGS 2019</td><td><button class="btn">수정</button></td></tr>
  <tr><td>GAS</td><td>T점수 50 이상 = 목표 달성</td><td>Kiresuk</td><td><button class="btn">수정</button></td></tr></table>
+ <h3>통합기능점수 가중치 (잠정)</h3><table><tr><th>영역</th><th>측정</th><th>가중치</th></tr>${DK.map(k=>`<tr><td>${DN[k]}</td><td class="note">${{phys:'SPPB(FAC 3 미만은 FAC·앉기 환산)',adl:'K-MBI',ls:'K-LSA',str:'악력(성별 기준값 60점)',cog:'Mini-Cog',vit:'손가락 고리, BMI, 영양, K-FRAIL',mood:'PHQ-2',qol:'EQ-5D-5L 수준합, VAS'}[k]}</td><td><input data-w="${k}" type="number" min="0" max="50" value="${W[k]}" style="width:60px"></td></tr>`).join('')}<tr><td colspan="2"><b>합계</b></td><td><b>${DK.reduce((a,k)=>a+W[k],0)}</b></td></tr></table><p class="note">합계가 100이 되도록 맞춥니다. 바꾸면 버전 번호가 올라가고 이전 점수는 이전 버전으로 보관됩니다. 연구 자료가 쌓이면 자료 기반 가중치로 교체합니다.</p>
  <h3>회기 알림 규칙</h3><table><tr><th>규칙</th><th>조건</th></tr><tr><td>참여 저하</td><td>따라하기 2점 이하 3회 연속</td></tr><tr><td>컨디션 저하</td><td>오늘 상태 2점 이하 2회 연속</td></tr><tr><td>낙상</td><td>낙상 보고 1회 즉시</td></tr><tr><td>보호자 참여 권장</td><td>환경·맥락 2점 이하 4회 이상</td></tr></table>
  <h3>변경 이력</h3><table><tr><td>v1.2</td><td>2026-11-20</td><td>K-MBI 기준 잠정 15점 추가</td></tr><tr><td>v1.1</td><td>2026-11-12</td><td>K-LSA, 악력, 손가락 고리 추가</td></tr></table></div>`;
  if(adminTab=='log')b=`<div class="card"><h2>접근 기록</h2><div class="scroll"><table><tr><th>시각</th><th>아이디</th><th>행위</th><th>대상</th></tr>
@@ -262,7 +297,7 @@ function admin(){
  <tr><td>기관별 보고서</td><td>PDF</td><td><button class="btn">기관 선택</button></td></tr>
  <tr><td>사회서비스원 제출용 집계</td><td>XLSX</td><td><button class="btn">내려받기</button></td></tr></table>
  <p class="note">내려받기는 모두 접근 기록에 남습니다.</p></div>`;
- if(adminTab=='all')b=`<div class="card"><h2>전체 화면 보기</h2><p>총괄관리자는 아래 아이디의 화면을 그대로 볼 수 있습니다. 위 로그인 아이디 목록에서 바꿔도 같습니다.</p>
+ if(adminTab=='all')b=`<div class="card"><h2>전체 화면 보기</h2><p>총괄관리자는 아래 아이디의 화면 구성을 미리 볼 수 있습니다. 미리보기의 이름은 예시이며, 실제 운영에서 총괄관리자 계정에는 이름 대신 등록번호만 표시됩니다.</p>
  ${ACCTS.filter(a=>a.role!='총괄관리자'&&a.st!='승인 대기'&&a.id!='bk01-mgr').map(a=>`<button class="btn" data-go="${a.id}" style="margin:3px">${a.id} 화면</button>`).join('')}</div>`;
  return k+nav+b;
 }
@@ -272,9 +307,10 @@ function agency(){
  return `<div class="kpis"><div class="kpi"><b>${tot}</b><span>이용자</span></div><div class="kpi"><b>56%</b><span>기능 개선 비율</span></div><div class="kpi"><b>87%</b><span>평가 이행률</span></div><div class="kpi"><b>71%</b><span>GAS 목표 달성</span></div></div>
  <div class="row" style="margin-top:12px"><div class="card"><h2>기관별 개선율 (이용자 특성 보정 후)</h2>${hbar(ORGS.map(o=>({l:o.n,v:o.adjImp,c:o.adjImp<50?'#b7791f':'#2f5bd3'})),80,'%',55)}<p class="note">초기 기능단계, 인지, 동반질환을 보정한 값입니다. 노란색은 전체보다 낮은 기관입니다.</p></div>
  <div class="card"><h2>평가 이행률</h2>${hbar(ORGS.map(o=>({l:o.n,v:o.proc,c:o.proc<80?'#c0392b':'#1f8a4c'})),100,'%',87)}<p class="note">사전·회기·사후를 정해진 시점에 입력한 비율입니다.</p></div></div>
- <div class="row"><div class="card"><h2>기능단계별 사전·사후 SPPB 평균</h2><table><tr><th>시작 단계</th><th>인원</th><th>사전</th><th>사후</th><th>변화</th></tr>
- <tr><td>1 누워서 운동</td><td>6</td><td>1.2</td><td>1.8</td><td>+0.6</td></tr><tr><td>2 앉아서 운동</td><td>14</td><td>3.1</td><td>4.0</td><td>+0.9</td></tr><tr><td>3 잡고 서서 운동</td><td>27</td><td>5.4</td><td>6.7</td><td>+1.3</td></tr><tr><td>4 집 안 걷기</td><td>21</td><td>7.8</td><td>8.9</td><td>+1.1</td></tr><tr><td>5 집 밖 걷기</td><td>10</td><td>9.6</td><td>10.2</td><td>+0.6</td></tr></table></div>
+ <div class="row"><div class="card"><h2>생활공간 표현형별 사전·사후 SPPB 평균</h2><table><tr><th>시작 표현형</th><th>인원</th><th>사전</th><th>사후</th><th>변화</th></tr>
+ <tr><td>Ⅰ 침상 제한형</td><td>6</td><td>1.2</td><td>1.8</td><td>+0.6</td></tr><tr><td>Ⅱ 좌위 제한형</td><td>14</td><td>3.1</td><td>4.0</td><td>+0.9</td></tr><tr><td>Ⅲ 실내 의존형</td><td>27</td><td>5.4</td><td>6.7</td><td>+1.3</td></tr><tr><td>Ⅳ 실내 자립형</td><td>21</td><td>7.8</td><td>8.9</td><td>+1.1</td></tr><tr><td>Ⅴ 실외 활동형</td><td>10</td><td>9.6</td><td>10.2</td><td>+0.6</td></tr></table></div>
  <div class="card"><h2>월별 누적 이용자</h2>${lines([{v:[12,31,52,67,78],c:C1}],5,0,80,['7월','8월','9월','10월','11월'],20)}</div></div>
+ <div class="card"><h2>그룹별 통합기능점수 비교</h2>${groupRadar()}</div>
  <div class="lock">이 화면에는 개인별 자료가 나오지 않습니다. 기관 단위 집계만 볼 수 있습니다.</div>`;
 }
 
@@ -295,8 +331,9 @@ function orgmgr(){
  const staff=[['제공인력 1',5,100,0],['제공인력 2',5,95,0],['제공인력 3',6,92,1],['제공인력 4 (승인 대기)',4,0,0]];
  return `<div class="kpis"><div class="kpi"><b>20</b><span>이용자</span></div><div class="kpi"><b>64%</b><span>기능 개선 (보정)</span></div><div class="kpi"><b>94%</b><span>평가 이행률</span></div><div class="kpi"><b style="color:var(--bad)">3</b><span>확인 필요 알림</span></div></div>
  <div class="row" style="margin-top:12px"><div class="card"><h2>제공인력별 현황</h2><table><tr><th>제공인력</th><th>담당</th><th>이행률</th><th>미입력</th></tr>${staff.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}명</td><td>${s[2]}%</td><td>${s[3]?'<span class="tag t-warn">'+s[3]+'건</span>':'-'}</td></tr>`).join('')}</table><button class="btn" style="margin-top:8px">+ 제공인력 추가 요청</button><p class="note">요청하면 총괄관리자가 승인한 뒤 계정이 열립니다.</p></div>
+ <div class="card"><h2>우리 기관 vs 전체 (사후, 보정)</h2>${(()=>{const sets=[{n:'전체',c:'#8e8e93',f:0.08,o:mk(BASE,[6,6,6,6,6,6,6,6])},{n:'A복지관',c:'#007aff',f:0.2,o:mk(BASE,[10,9,12,7,6,8,7,8])}];return radarSVG(sets,280)+radarLeg(sets)})()}</div>
  <div class="card"><h2>우리 기관 결과 분포</h2>${hbar([{l:'개선',v:12,c:'#1f8a4c'},{l:'유지',v:6,c:'#9aa3af'},{l:'악화',v:1,c:'#c0392b'},{l:'사후 전',v:1,c:'#c9d6f6'}],20,'명')}</div></div>
- <div class="card"><h2>이용자 목록</h2><table><tr><th>이름 (등록번호)</th><th>담당</th><th>단계</th><th>알림</th></tr>${MY.map(u=>`<tr><td>${NM[u.id]}<br><span class="note">${u.id}</span></td><td>제공인력 3</td><td>${u.st}</td><td>${u.al.length?u.al.map(x=>'<span class="tag t-warn">'+x+'</span>').join(' '):'-'}</td></tr>`).join('')}<tr><td colspan="4" class="note">… 외 14명</td></tr></table></div>
+ <div class="card"><h2>이용자 목록</h2><table><tr><th>이름 (등록번호)</th><th>담당</th><th>표현형</th><th>알림</th></tr>${MY.map(u=>`<tr><td>${NM[u.id]}<br><span class="note">${u.id}</span></td><td>제공인력 3</td><td>${u.st}</td><td>${u.al.length?u.al.map(x=>'<span class="tag t-warn">'+x+'</span>').join(' '):'-'}</td></tr>`).join('')}<tr><td colspan="4" class="note">… 외 14명</td></tr></table></div>
  <div class="lock">다른 기관(BK01, SG01 등)의 자료는 보이지 않습니다. 기관 간 비교는 사회서비스원 화면에서만 보입니다.</div>`;
 }
 
@@ -304,9 +341,10 @@ function provider(){
  const u=MY[selU];
  const lab=u.cond.map((_,i)=>i+1);
  return `<div class="kpis"><div class="kpi"><b>6</b><span>담당 이용자</span></div><div class="kpi"><b style="color:var(--warn)">4</b><span>알림</span></div></div>
- <div class="card" style="margin-top:10px"><h2>담당 이용자</h2><div class="ulist">${MY.map((m,i)=>`<div data-u="${i}" class="${i==selU?'sel':''}"><span><b>${NM[m.id]}</b><br><span class="note">${m.id} · 단계 ${m.st} · ${m.ses}회기</span></span><span>${m.al.length?'<span class="tag t-warn">'+m.al.length+'</span>':'<span class="tag t-ok">정상</span>'}</span></div>`).join('')}</div></div>
+ <div class="card" style="margin-top:10px"><h2>담당 이용자</h2><div class="ulist">${MY.map((m,i)=>`<div data-u="${i}" class="${i==selU?'sel':''}"><span><b>${NM[m.id]}</b><br><span class="note">${m.id} · 표현형 ${m.st} · ${m.ses}회기</span></span><span>${m.al.length?'<span class="tag t-warn">'+m.al.length+'</span>':'<span class="tag t-ok">정상</span>'}</span></div>`).join('')}</div></div>
  <div class="card"><h2>${NM[u.id].split(' · ')[0]} 님 회기 흐름</h2>${lines([{v:u.cond,c:C1},{v:u.fol,c:C2},{v:u.ctx,c:C3}],u.cond.length,1,5,lab)}${leg([['컨디션',C1],['따라하기',C2],['환경·맥락',C3]])}
  ${u.al.length?u.al.map(x=>`<div class="lock" style="border-color:var(--warn);color:var(--warn);background:var(--warn2)">${x}</div>`).join(''):'<p class="note">알림 없음</p>'}
+ </div><div class="card"><h2>${NM[u.id].split(' · ')[0]} 님 통합기능점수</h2><div style="margin-bottom:6px">${(PT[selU]||[]).map(t=>`<span class="tag t-warn">${t}</span>`).join(' ')||'<span class="note">꼬리표 없음</span>'}</div>${(()=>{const d=PD[selU];const sets=[{n:'사전',c:'#8e8e93',f:0.1,o:mk(BASE,d[0])},...(d[1]?[{n:'사후',c:'#007aff',f:0.22,o:mk(BASE,d[1])}]:[])];return radarSVG(sets,300)+radarLeg(sets)})()}
  <div style="margin-top:10px"><button class="btn f">회기 입력</button> <button class="btn">결과지 보기</button></div></div>
  <div class="lock">배정된 6명만 보입니다. 다른 제공인력의 이용자나 다른 기관 자료는 보이지 않습니다.</div>`;
 }
@@ -329,6 +367,9 @@ function render(){
  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{adminTab=b.dataset.a;render()});
  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{cur=b.dataset.go;render();scrollTo(0,0)});
  document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{selU=+b.dataset.u;render()});
+ document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{grpKey=b.dataset.g;render()});
+ document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{grpTime=b.dataset.gt;render()});
+ document.querySelectorAll('[data-w]').forEach(x=>x.onchange=()=>{W[x.dataset.w]=+x.value||0;render()});
 }
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
 render();
