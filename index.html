@@ -100,6 +100,9 @@ input[type=range]{background:transparent;min-height:auto;padding:0;accent-color:
 <div style="display:flex;justify-content:space-between;margin-top:8px"><button id="pv" class="md">이전</button><button id="nx" class="md">다음</button></div></div>
 <script>
 const NM=['침상 제한형','좌위 제한형','실내 의존형','실내 자립형','실외 활동형'];
+const VID=['1dlqDxkcK8w','MLNprfb7NsE','','',''];
+const VTT=['침상 운동','앉아서 하는 운동','','',''];
+const vidBlock=(st,g)=>{const id=VID[st-1],t=`${'ⅠⅡⅢⅣⅤ'[st-1]}단계 ${NM[st-1]}`;if(!id)return `<div style="margin-top:12px;padding:12px;background:var(--bg-neutral);border-radius:var(--radius)"><div style="font-size:14px;font-weight:600">${t} 안내 영상</div><div style="font-size:13px;color:var(--text-secondary);margin-top:4px">준비 중입니다.</div></div>`;return `<div style="margin-top:12px"><div style="font-size:14px;font-weight:600;margin-bottom:6px">${t} 안내 영상 · ${VTT[st-1]}${g?' <span style="font-weight:400;color:var(--text-secondary)">(보호자 동반)</span>':''}</div><div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden"><iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1" title="${t} 안내 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div><div style="font-size:12px;margin-top:4px"><a href="https://youtu.be/${id}" target="_blank" rel="noopener">유튜브에서 열기</a></div></div>`};
 const stg=(f,s)=>f==0?(s==='가능'?2:1):f<=2?3:f<=4?4:5;
 const ICF={fall:'d450 · 개인요인',frail:'b455 b530',mood:'b152 b210 b230',reg:'b530 (체중)',demo:'e310 e320 e340 e165 · 개인요인',who:'',body:'b530',resp:'',presp:'',fac:'d450 d465',sit:'d4153',stage:'',bal:'d415',gait:'d450',chair:'d410',grip:'b730',sex:'',kmbi:'d420 d510 d530 d540 d550 d4551',lsa:'d4600 d4602 d910',yubi:'s750',iadl:'d620 d630 d640 d470 d860',ipaq:'신체활동',calf:'s750',struct:'s750 s770 s810',nrs:'b280',ptype:'b280',eq:'복합',mc:'b144',gas:'개인 목표',gasr:'개인 목표',grc:'',dis:'',con:'',eng:'',dose:'',home:'',ev:'',sn:''};
 const IAD=[
@@ -525,6 +528,7 @@ add('GAS T점수',gs.map((G,g)=>GLIB[G.lib][0]+' '+(xs[g]>0?'+':'')+xs[g]).join(
 const imp=core.filter(c=>c==='개선').length,wor=core.filter(c=>c==='악화').length,ov=wor?'재평가 필요':imp>=2?'개선':imp?'부분 개선':'유지';
 const guard=mcS(p)<=2||p.resp!=='직접응답'||q.presp!=='직접응답',mism=+q.grc<=3&&J(k1-k0,15)[0]==='유지';
 h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px">${[['종합 판정',ov,'핵심 지표 개선 '+imp+'개'],['배정 영상',s1+'단계 '+NM[s1-1],guard?'보호자 동반 표시':'혼자 가능'],['다음 단계 조건',s1<5?['혼자 앉기 가능','FAC 1 이상','FAC 3 이상','FAC 5'][s1-1]:'유지 관리','도달 시 상위 영상']].map(c=>`<div style="background:var(--bg-neutral);border-radius:var(--radius);padding:10px"><div style="font-size:12px;color:var(--text-secondary)">${c[0]}</div><div style="font-size:16px;font-weight:500;margin-top:4px">${c[1]}</div><div style="font-size:12px;color:var(--text-secondary)">${c[2]}</div></div>`).join('')}</div>`;
+h+=vidBlock(s1,guard);
 if(mism)h+=`<div class="say">체감은 좋아졌으나 K-MBI 유지 판정: 재가 노인 K-MBI 기준 산출용 사례로 자동 표시</div>`;
 if((p.struct||[]).some(s=>s!=='없음'))h+=`<div class="how">신체구조 체크: ${p.struct.join(', ')} (운동 처방 시 고려)</div>`;return h}
 const logT=()=>{const q=list()[i],a=A[mode];if(!q)return;a._t=a._t||{};a._t[q.id]=Math.round(((a._t[q.id]||0)+(performance.now()-tStart)/1000)*10)/10};
