@@ -69,6 +69,12 @@ input[type=range]{background:transparent;min-height:auto;padding:0;accent-color:
 .md{background:var(--bg-neutral);color:var(--text-accent);border-radius:999px;min-height:34px;padding:6px 14px;font-size:14px}
 .md.on{background:var(--text-accent);color:#fff}
 .tools .md{background:transparent;color:var(--text-accent);padding:6px 8px}
+.vbtn{white-space:nowrap;background:var(--surface-2);color:var(--text-accent);border:1px solid var(--border-accent);border-radius:10px;font-weight:600;padding:6px 16px}
+.vbtn.on{background:var(--text-accent);color:#fff}
+.vchip{background:var(--bg-neutral);color:var(--ink);border-radius:10px;min-height:44px;padding:6px 12px;font-size:14px;text-align:left;line-height:1.3}
+.vchip small{display:block;font-size:12px;color:var(--text-secondary)}
+.vchip.on{background:var(--text-accent);color:#fff}.vchip.on small{color:rgba(255,255,255,.85)}
+.vchip:disabled{opacity:.55}
 .box{border:0;border-radius:16px;padding:18px 18px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .op{background:var(--surface-1);border:0;border-radius:12px;padding:12px 40px 12px 14px;font-size:16px;position:relative;margin:6px 0}
 .op small{font-size:13px}
@@ -94,7 +100,8 @@ input[type=range]{background:transparent;min-height:auto;padding:0;accent-color:
 </style>
 <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
 <div class="seg"><button class="md" data-m="pre">사전평가</button><button class="md" data-m="ses">회기 모니터링</button><button class="md" data-m="post">사후평가</button></div>
-<span style="flex:1"></span><span class="tools"><button class="md" id="reset">빈 양식</button><button class="md" id="fill">예시값</button></span></div>
+<span style="flex:1 0 auto;display:flex;justify-content:center"><button class="md vbtn" id="vidBtn" aria-pressed="false">▶ 운동 영상</button></span><span class="tools"><button class="md" id="reset">빈 양식</button><button class="md" id="fill">예시값</button></span></div>
+<div class="box hidden" id="vpanel"></div>
 <div style="height:3px;background:var(--bg-neutral);border-radius:2px;margin-bottom:14px"><div id="bar" style="height:3px;background:var(--text-accent);border-radius:2px;width:0"></div></div>
 <div class="box"><div id="q"></div><div class="err" id="err"></div>
 <div style="display:flex;justify-content:space-between;margin-top:8px"><button id="pv" class="md">이전</button><button id="nx" class="md">다음</button></div></div>
@@ -534,9 +541,17 @@ if((p.struct||[]).some(s=>s!=='없음'))h+=`<div class="how">신체구조 체크
 const logT=()=>{const q=list()[i],a=A[mode];if(!q)return;a._t=a._t||{};a._t[q.id]=Math.round(((a._t[q.id]||0)+(performance.now()-tStart)/1000)*10)/10};
 document.getElementById('nx').onclick=()=>{const q=list()[i];logT();if(!valid(q)){document.getElementById('err').textContent='응답을 입력해야 다음으로 넘어갑니다.';return}i++;render()};
 document.getElementById('pv').onclick=()=>{logT();i--;render()};
-document.querySelectorAll('.md[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;i=0;document.querySelectorAll('.md[data-m]').forEach(x=>x.classList.toggle('on',x===b));render()});
+document.querySelectorAll('.md[data-m]').forEach(b=>b.onclick=()=>{showV(false);mode=b.dataset.m;i=0;document.querySelectorAll('.md[data-m]').forEach(x=>x.classList.toggle('on',x===b));render()});
 document.getElementById('fill').onclick=()=>{A={pre:clone(EX.pre),ses:clone(EX.ses),post:clone(EX.post)};render()};
 document.getElementById('reset').onclick=()=>{A[mode]=mode==='post'?{}:{};if(mode==='pre')A.pre={};render()};
+
+let vSt=1;
+const VDESC=['주로 누워서 지내시는 분과 보호자','앉을 수는 있으나 걷기 어려운 분','잡거나 도움을 받으면 걸을 수 있는 분','집 안에서는 혼자 걸으시는 분','계단과 바깥길도 혼자 다니시는 분'];
+const vRender=()=>{const p=document.getElementById('vpanel');const chips=NM.map((n,k)=>`<button class="vchip${k+1===vSt?' on':''}" data-vs="${k+1}">${'ⅠⅡⅢⅣⅤ'[k]}단계 ${n}<small>${VID[k]?VTT[k]:'준비 중'}</small></button>`).join('');
+p.innerHTML=`<div style="font-size:17px;font-weight:700;margin-bottom:4px">운동 영상</div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">생활공간 표현형 단계별 자가운동 안내 영상입니다. 아프거나 어지러우면 바로 멈추고 쉬세요.</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-bottom:10px">${chips}</div><div style="font-size:13px;color:var(--text-secondary)">대상: ${VDESC[vSt-1]}</div>`+vidBlock(vSt,false);
+p.querySelectorAll('[data-vs]').forEach(b=>b.onclick=()=>{vSt=+b.dataset.vs;vRender()})};
+const showV=on=>{const vb=document.getElementById('vidBtn');vb.classList.toggle('on',on);vb.setAttribute('aria-pressed',on);document.getElementById('vpanel').classList.toggle('hidden',!on);document.getElementById('q').parentElement.classList.toggle('hidden',on);document.getElementById('bar').parentElement.classList.toggle('hidden',on);document.querySelector('.tools').style.visibility=on?'hidden':'';if(on){document.querySelectorAll('.md[data-m]').forEach(x=>x.classList.remove('on'));vRender()}else{const p=document.getElementById('vpanel');p.innerHTML=''}};
+document.getElementById('vidBtn').onclick=()=>{const on=!document.getElementById('vidBtn').classList.contains('on');showV(on);if(!on)document.querySelector(`.md[data-m="${mode}"]`).classList.add('on')};
 document.querySelector('.md[data-m="pre"]').classList.add('on');render();
 </script>
 
